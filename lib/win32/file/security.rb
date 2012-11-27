@@ -63,9 +63,10 @@ class File
       end
 
       acl = ACL.new
-      dacl_present_ptr   = FFI::MemoryPointer.new(:ulong)
+      dacl_present_ptr   = FFI::MemoryPointer.new(:bool)
       dacl_defaulted_ptr = FFI::MemoryPointer.new(:ulong)
 
+      # TODO: ACL struct is not getting filled with expected values. Fix.
       val = GetSecurityDescriptorDacl(
         security_ptr,
         dacl_present_ptr,
@@ -83,11 +84,6 @@ class File
 
       ace_count  = acl[:AceCount]
       perms_hash = {}
-
-      p acl[:AclRevision]
-      p ace_count
     end
   end
 end
-
-File.get_permissions('test.txt')
