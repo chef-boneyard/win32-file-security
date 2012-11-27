@@ -12,6 +12,12 @@ module Windows
       attach_function :GetFileSecurityW, [:buffer_in, :ulong, :pointer, :ulong, :pointer], :bool
       attach_function :GetSecurityDescriptorControl, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorDacl, [:pointer, :pointer, :pointer, :pointer], :ulong
+
+      ffi_lib :kernel32
+
+      attach_function :GetVolumeInformationW,
+        [:buffer_in, :buffer_out, :ulong, :pointer, :pointer, :pointer, :buffer_out, :ulong],
+        :bool
     end
   end
 end

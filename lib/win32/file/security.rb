@@ -14,6 +14,46 @@ class File
 
   class << self
 
+    # Returns whether or not the root path is encryptable. If no root is
+    # specified, it will check against the root of the current directory.
+    # Be sure to include a trailing slash in the root path name.
+    #
+    # Examples:
+    #
+    #   p File.encryptable?
+    #   p File.encryptable?("D:\\")
+    #
+    def encryptable?(file = nil)
+      bool = false
+      volume_buffer = 0.chr * 260
+      flags_ptr = FFI::MemoryPointer.new(:ulong)
+
+      file = file.wincode if file
+
+      val = GetVolumeInformationW(
+        file,
+        volume_buffer,
+        volume_buffer.size,
+        nil,
+        nil,
+        flags_ptr,
+        nil,
+        0
+      )
+
+      unless val
+        raise SystemCallError.new("GetVolumeInformation", FFI.errno)
+      end
+
+      flags = flags_ptr.read_ulong
+
+      if flags & FILE_SUPPORTS_ENCRYPTION > 0
+        bool = true
+      end
+
+      bool
+    end
+
     # Encrypts a file or directory. All data streams in a file are encrypted.
     # All new files created in an encrypted directory are encrypted.
     #
@@ -124,4 +164,5 @@ class File
   end
 end
 
-File.encrypt('test.txt')
+p File.encryptable?
+#File.encrypt('test.txt')
