@@ -13,6 +13,42 @@ class File
   WIN32_FILE_SECURITY_VERSION = '1.0.0'
 
   class << self
+
+    # Encrypts a file or directory. All data streams in a file are encrypted.
+    # All new files created in an encrypted directory are encrypted.
+    #
+    # The caller must have the FILE_READ_DATA, FILE_WRITE_DATA,
+    # FILE_READ_ATTRIBUTES, FILE_WRITE_ATTRIBUTES, and SYNCHRONIZE access
+    # rights.
+    #
+    # Requires exclusive access to the file being encrypted, and will fail if
+    # another process is using the file or the file is marked read-only. If the
+    # file is compressed the file will be decompressed before encrypting it.
+    #
+    def encrypt(file)
+      unless EncryptFileW(file.wincode)
+        raise SystemCallError.new("EncryptFile", FFI.errno)
+      end
+      self
+    end
+
+    # Decrypts an encrypted file or directory.
+    #
+    # The caller must have the FILE_READ_DATA, FILE_WRITE_DATA,
+    # FILE_READ_ATTRIBUTES, FILE_WRITE_ATTRIBUTES, and SYNCHRONIZE access
+    # rights.
+    #
+    # Requires exclusive access to the file being decrypted, and will fail if
+    # another process is using the file. If the file is not encrypted an error
+    # is NOT raised, it's simply a no-op.
+    #
+    def decrypt(file)
+      unless DecryptFileW(file.wincode, 0)
+        raise SystemCallError.new("DecryptFile", FFI.errno)
+      end
+      self
+    end
+
     def get_permissions(file, host=nil)
       size_needed_ptr = FFI::MemoryPointer.new(:ulong)
       security_ptr    = FFI::MemoryPointer.new(:ulong)
@@ -87,3 +123,5 @@ class File
     end
   end
 end
+
+File.encrypt('test.txt')
