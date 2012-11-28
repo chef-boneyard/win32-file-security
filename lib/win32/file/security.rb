@@ -25,23 +25,11 @@ class File
     #
     def encryptable?(file = nil)
       bool = false
-      volume_buffer = 0.chr * 260
       flags_ptr = FFI::MemoryPointer.new(:ulong)
 
       file = file.wincode if file
 
-      val = GetVolumeInformationW(
-        file,
-        volume_buffer,
-        volume_buffer.size,
-        nil,
-        nil,
-        flags_ptr,
-        nil,
-        0
-      )
-
-      unless val
+      unless GetVolumeInformationW(file, nil, 0, nil, nil, flags_ptr, nil, 0)
         raise SystemCallError.new("GetVolumeInformation", FFI.errno)
       end
 
@@ -164,5 +152,5 @@ class File
   end
 end
 
-p File.encryptable?
+p File.encryptable?("C:\\")
 #File.encrypt('test.txt')
