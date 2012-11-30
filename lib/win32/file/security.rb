@@ -82,7 +82,9 @@ class File
       security_ptr    = FFI::MemoryPointer.new(:ulong)
 
       wide_file = file.wincode
+      wide_host = host ? host.wincode : nil
 
+      # First pass, get the size needed
       bool = GetFileSecurityW(
         wide_file,
         DACL_SECURITY_INFORMATION,
@@ -101,6 +103,7 @@ class File
 
       security_ptr = FFI::MemoryPointer.new(size_needed)
 
+      # Second pass, this time with the appropriately sized security pointer
       bool = GetFileSecurityW(
         wide_file,
         DACL_SECURITY_INFORMATION,
@@ -126,15 +129,14 @@ class File
         raise ArgumentError, "No DACL present: explicit deny all"
       end
 
-      acl = ACL.new
+      dacl_pptr          = FFI::MemoryPointer.new(:pointer)
       dacl_present_ptr   = FFI::MemoryPointer.new(:bool)
       dacl_defaulted_ptr = FFI::MemoryPointer.new(:ulong)
 
-      # TODO: ACL struct is not getting filled with expected values. Fix.
       val = GetSecurityDescriptorDacl(
         security_ptr,
         dacl_present_ptr,
-        acl,
+        dacl_pptr,
         dacl_defaulted_ptr
       )
 
@@ -142,15 +144,51 @@ class File
         raise SystemCallError.new("GetSecurityDescriptorDacl", FFI.errno)
       end
 
+      acl = ACL.new(dacl_pptr.read_pointer)
+
       if acl[:AclRevision] == 0
         raise ArgumentError, "DACL is NULL: implicit access grant"
       end
 
       ace_count  = acl[:AceCount]
       perms_hash = {}
+
+      0.upto(ace_count - 1){ |i|
+        ace_pptr = FFI::MemoryPointer.new(:pointer)
+        next unless GetAce(acl, i, ace_pptr)
+
+        access = ACCESS_ALLOWED_ACE.new(ace_pptr.read_pointer)
+
+        if access[:Header][:AceType] == ACCESS_ALLOWED_ACE_TYPE
+          name = FFI::MemoryPointer.new(:uchar, 260)
+          name_size = FFI::MemoryPointer.new(:ulong)
+
+          domain = FFI::MemoryPointer.new(:uchar, 260)
+          domain_size = FFI::MemoryPointer.new(:ulong)
+
+          use_ptr = FFI::MemoryPointer.new(:pointer)
+
+          name_size.write_ulong(name.size)
+          domain_size.write_ulong(domain.size)
+
+          # TODO: Fix. Currently segfaults.
+          val = LookupAccountSidW(
+            wide_host,
+            access[:SidStart],
+            name,
+            name_size,
+            domain,
+            domain_size,
+            use_ptr
+          )
+
+          if val == 0
+            raise SystemCallError.new("LookupAccountSid", FFI.errno)
+          end
+        end
+      }
     end
   end
 end
 
-p File.encryptable?("C:\\")
-#File.encrypt('test.txt')
+File.get_permissions('test.txt')

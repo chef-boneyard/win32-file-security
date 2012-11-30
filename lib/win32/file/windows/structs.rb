@@ -11,6 +11,14 @@ module Windows
         )
       end
 
+      class ACCESS_ALLOWED_ACE < FFI::Struct
+        layout(
+          :Header, ACE_HEADER,
+          :Mask, :ulong,
+          :SidStart, :ulong
+        )
+      end
+
       class ACL < FFI::Struct
         layout(
           :AclRevision, :uchar,

@@ -8,10 +8,11 @@ module Windows
 
       attach_function :EncryptFileW, [:buffer_in], :bool
       attach_function :DecryptFileW, [:buffer_in, :ulong], :bool
-      attach_function :GetAce, [:pointer, :ulong, :ulong], :bool
+      attach_function :GetAce, [:pointer, :ulong, :pointer], :bool
       attach_function :GetFileSecurityW, [:buffer_in, :ulong, :pointer, :ulong, :pointer], :bool
       attach_function :GetSecurityDescriptorControl, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorDacl, [:pointer, :pointer, :pointer, :pointer], :ulong
+      attach_function :LookupAccountSidW, [:buffer_in, :ulong, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
 
       ffi_lib :kernel32
 
