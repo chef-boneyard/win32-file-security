@@ -220,5 +220,43 @@ class File
 
       perms_hash
     end
+
+    # Returns an array of human-readable strings that correspond to the
+    # permission flags.
+    #
+    # Example:
+    #
+    #   File.get_permissions('test.txt').each{ |name, mask|
+    #     puts name
+    #     p File.securities(mask)
+    #   }
+    #
+    def securities(mask)
+      sec_array = []
+
+      security_rights = {
+        'FULL'    => FULL,
+        'DELETE'  => DELETE,
+        'READ'    => READ,
+        'CHANGE'  => CHANGE,
+        'ADD'     => ADD
+      }
+
+      if mask == 0
+        sec_array.push('NONE')
+      else
+        if (mask & FULL) ^ FULL == 0
+          sec_array.push('FULL')
+        else
+          security_rights.each{ |string, numeric|
+            if (numeric & mask) ^ numeric == 0
+              sec_array.push(string)
+            end
+          }
+        end
+      end
+
+      sec_array
+    end
   end
 end
