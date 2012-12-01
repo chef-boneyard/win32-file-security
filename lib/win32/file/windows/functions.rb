@@ -12,7 +12,7 @@ module Windows
       attach_function :GetFileSecurityW, [:buffer_in, :ulong, :pointer, :ulong, :pointer], :bool
       attach_function :GetSecurityDescriptorControl, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorDacl, [:pointer, :pointer, :pointer, :pointer], :ulong
-      attach_function :LookupAccountSidW, [:buffer_in, :ulong, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
+      attach_function :LookupAccountSidW, [:buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
 
       ffi_lib :kernel32
 

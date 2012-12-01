@@ -77,6 +77,27 @@ class File
       self
     end
 
+    # Returns a hash describing the current file permissions for the given
+    # file.  The account name is the key, and the value is an integer mask
+    # that corresponds to the security permissions for that file.
+    #
+    # To get a human readable version of the permissions, pass the value to
+    # the +File.securities+ method.
+    #
+    # You may optionally specify a host as the second argument. If no host is
+    # specified then the current host is used.
+    #
+    # Examples:
+    #
+    #   hash = File.get_permissions('test.txt')
+    #
+    #   p hash # => {"NT AUTHORITY\\SYSTEM"=>2032127, "BUILTIN\\Administrators"=>2032127, ...}
+    #
+    #   hash.each{ |name, mask|
+    #     p name
+    #     p File.securities(mask)
+    #   }
+    #
     def get_permissions(file, host=nil)
       size_needed_ptr = FFI::MemoryPointer.new(:ulong)
       security_ptr    = FFI::MemoryPointer.new(:ulong)
@@ -162,19 +183,17 @@ class File
         if access[:Header][:AceType] == ACCESS_ALLOWED_ACE_TYPE
           name = FFI::MemoryPointer.new(:uchar, 260)
           name_size = FFI::MemoryPointer.new(:ulong)
+          name_size.write_ulong(name.size)
 
           domain = FFI::MemoryPointer.new(:uchar, 260)
           domain_size = FFI::MemoryPointer.new(:ulong)
+          domain_size.write_ulong(domain.size)
 
           use_ptr = FFI::MemoryPointer.new(:pointer)
 
-          name_size.write_ulong(name.size)
-          domain_size.write_ulong(domain.size)
-
-          # TODO: Fix. Currently segfaults.
           val = LookupAccountSidW(
             wide_host,
-            access[:SidStart],
+            ace_pptr.read_pointer + 8,
             name,
             name_size,
             domain,
@@ -185,10 +204,21 @@ class File
           if val == 0
             raise SystemCallError.new("LookupAccountSid", FFI.errno)
           end
+
+          # The x2 multiplier is necessary due to wide char strings.
+          name = name.read_string(name_size.read_ulong * 2).delete(0.chr)
+          domain = domain.read_string(domain_size.read_ulong * 2).delete(0.chr)
+          mask =
+
+          unless domain.empty?
+            name = domain + '\\' + name
+          end
+
+          perms_hash[name] = access[:Mask]
         end
       }
+
+      perms_hash
     end
   end
 end
-
-File.get_permissions('test.txt')
