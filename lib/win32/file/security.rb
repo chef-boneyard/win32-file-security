@@ -221,6 +221,163 @@ class File
       perms_hash
     end
 
+    # Sets the file permissions for the given file name.  The 'permissions'
+    # argument is a hash with an account name as the key, and the various
+    # permission constants as possible values. The possible constant values
+    # are:
+    #
+    # * FILE_READ_DATA
+    # * FILE_WRITE_DATA
+    # * FILE_APPEND_DATA
+    # * FILE_READ_EA
+    # * FILE_WRITE_EA
+    # * FILE_EXECUTE
+    # * FILE_DELETE_CHILD
+    # * FILE_READ_ATTRIBUTES
+    # * FILE_WRITE_ATTRIBUTES
+    # * STANDARD_RIGHTS_ALL
+    # * FULL
+    # * READ
+    # * ADD
+    # * CHANGE
+    # * DELETE
+    # * READ_CONTROL
+    # * WRITE_DAC
+    # * WRITE_OWNER
+    # * SYNCHRONIZE
+    # * STANDARD_RIGHTS_REQUIRED
+    # * STANDARD_RIGHTS_READ
+    # * STANDARD_RIGHTS_WRITE
+    # * STANDARD_RIGHTS_EXECUTE
+    # * STANDARD_RIGHTS_ALL
+    # * SPECIFIC_RIGHTS_ALL
+    # * ACCESS_SYSTEM_SECURITY
+    # * MAXIMUM_ALLOWED
+    # * GENERIC_READ
+    # * GENERIC_WRITE
+    # * GENERIC_EXECUTE
+    # * GENERIC_ALL
+    #
+    def set_permissions(file, perms)
+      raise TypeError unless file.is_a?(String)
+      raise TypeError unless perms.kind_of?(Hash)
+
+      wide_file = file.wincode
+
+      account_rights = 0
+      sec_desc = FFI::MemoryPointer.new(:pointer, SECURITY_DESCRIPTOR_MIN_LENGTH)
+
+      unless InitializeSecurityDescriptor(sec_desc, 1)
+        raise SystemCallError.new("InitializeSecurityDescriptor", FFI.errno)
+      end
+
+      acl = ACL.new
+
+      unless InitializeAcl(acl, acl.size, ACL_REVISION2)
+        raise SystemCallError.new("InitializeAcl", FFI.errno)
+      end
+
+      perms.each{ |account, mask|
+        next if mask.nil?
+
+        server, account = account.split("\\")
+
+        if ['BUILTIN', 'NT AUTHORITY'].include?(server.upcase)
+          wide_server = nil
+        else
+          wide_server = server.wincode
+        end
+
+        wide_account = account.wincode
+
+        sid = FFI::MemoryPointer.new(:pointer, 1024)
+
+        sid_size = FFI::MemoryPointer.new(:ulong)
+        sid_size.write_ulong(sid.size)
+
+        use_ptr = FFI::MemoryPointer.new(:pointer)
+
+        val = LookupAccountName(
+           wide_server,
+           wide_account,
+           sid,
+           sid_size,
+           nil,
+           0,
+           snu_type
+        )
+
+        if val == 0
+          raise ArgumentError, get_last_error
+        end
+
+=begin
+        size = [0,0,0,0,0].pack('CCSLL').length # sizeof(ACCESS_ALLOWED_ACE)
+
+        val = CopySid(
+          ALLOW_ACE_LENGTH - size,
+          all_ace_ptr + 8,  # address of all_ace_ptr->SidStart
+          sid
+        )
+
+        if val == 0
+          raise ArgumentError, get_last_error
+        end
+
+        if (GENERIC_ALL & mask).nonzero?
+          account_rights = GENERIC_ALL & mask
+        elsif (GENERIC_RIGHTS_CHK & mask).nonzero?
+          account_rights = GENERIC_RIGHTS_MASK & mask
+        end
+
+        # all_ace_ptr->Header.AceFlags = INHERIT_ONLY_ACE|OBJECT_INHERIT_ACE
+        all_ace[1] = (INHERIT_ONLY_ACE | OBJECT_INHERIT_ACE).chr
+
+        # WHY DO I NEED THIS RUBY CORE TEAM? WHY?!?!?!?!?!?
+        all_ace.force_encoding('ASCII-8BIT') if RUBY_VERSION.to_f >= 1.9
+
+        2.times{
+          if account_rights != 0
+            all_ace[2,2] = [12 - 4 + GetLengthSid(sid)].pack('S')
+            all_ace[4,4] = [account_rights].pack('L')
+
+            val = AddAce(
+              acl_new,
+              ACL_REVISION2,
+              MAXDWORD,
+              all_ace_ptr,
+              all_ace[2,2].unpack('S').first
+            )
+
+            if val == 0
+              raise ArgumentError, get_last_error
+            end
+
+            # all_ace_ptr->Header.AceFlags = CONTAINER_INHERIT_ACE
+            all_ace[1] = CONTAINER_INHERIT_ACE.chr
+          else
+            # all_ace_ptr->Header.AceFlags = 0
+            all_ace[1] = 0.chr
+          end
+
+          account_rights = REST_RIGHTS_MASK & mask
+        }
+=end
+      }
+
+=begin
+      unless SetSecurityDescriptorDacl(sec_desc, 1, acl_new, 0)
+        raise ArgumentError, get_last_error
+      end
+
+      unless SetFileSecurityW(file, DACL_SECURITY_INFORMATION, sec_desc)
+        raise ArgumentError, get_last_error
+      end
+=end
+
+      self
+    end
+
     # Returns an array of human-readable strings that correspond to the
     # permission flags.
     #
@@ -260,3 +417,6 @@ class File
     end
   end
 end
+
+p File.get_permissions('test.txt')
+File.set_permissions('test.txt', {"scipio\\djberge" => File::FULL})

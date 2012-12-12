@@ -5,6 +5,8 @@ module Windows
       DACL_SECURITY_INFORMATION = 4
       ACCESS_ALLOWED_ACE_TYPE   = 0
       ERROR_INSUFFICIENT_BUFFER = 122
+      SECURITY_DESCRIPTOR_MIN_LENGTH = 20
+      ACL_REVISION2 = 2
 
       ## Security Rights
 
