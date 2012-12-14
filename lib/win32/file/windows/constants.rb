@@ -5,8 +5,12 @@ module Windows
       DACL_SECURITY_INFORMATION = 4
       ACCESS_ALLOWED_ACE_TYPE   = 0
       ERROR_INSUFFICIENT_BUFFER = 122
+      ACL_REVISION2             = 2
+      ALLOW_ACE_LENGTH          = 62
+      OBJECT_INHERIT_ACE        = 0x1
+      INHERIT_ONLY_ACE          = 0x8
+      MAXDWORD                  = 0xFFFFFFFF
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20
-      ACL_REVISION2 = 2
 
       ## Security Rights
 
@@ -23,6 +27,8 @@ module Windows
       GENERIC_WRITE                = 0x40000000
       GENERIC_EXECUTE              = 0x20000000
       GENERIC_ALL                  = 0x10000000
+      GENERIC_RIGHTS_CHK           = 0xF0000000
+      REST_RIGHTS_MASK             = 0x001FFFFF
 
       FILE_READ_DATA               = 1
       FILE_LIST_DIRECTORY          = 1
