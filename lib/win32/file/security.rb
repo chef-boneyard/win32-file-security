@@ -291,89 +291,78 @@ class File
         wide_account = account.wincode
 
         sid = FFI::MemoryPointer.new(:pointer, 1024)
-
         sid_size = FFI::MemoryPointer.new(:ulong)
         sid_size.write_ulong(sid.size)
 
+        domain = FFI::MemoryPointer.new(:uchar, 260)
+        domain_size = FFI::MemoryPointer.new(:ulong)
+        domain_size.write_ulong(domain.size)
+
         use_ptr = FFI::MemoryPointer.new(:pointer)
 
-        val = LookupAccountName(
+        val = LookupAccountNameW(
            wide_server,
            wide_account,
            sid,
            sid_size,
-           nil,
-           0,
-           snu_type
+           domain,
+           domain_size,
+           use_ptr
         )
 
-        if val == 0
-          raise ArgumentError, get_last_error
-        end
+        raise SystemCallError.new("LookupAccountName", FFI.errno) unless val
 
-=begin
-        size = [0,0,0,0,0].pack('CCSLL').length # sizeof(ACCESS_ALLOWED_ACE)
+        all_ace = ACCESS_ALLOWED_ACE.new
 
         val = CopySid(
-          ALLOW_ACE_LENGTH - size,
-          all_ace_ptr + 8,  # address of all_ace_ptr->SidStart
+          ALLOW_ACE_LENGTH - ACCESS_ALLOWED_ACE.size,
+          all_ace,
           sid
         )
 
-        if val == 0
-          raise ArgumentError, get_last_error
-        end
+        raise SystemCallError.new("CopySid", FFI.errno) unless val
 
         if (GENERIC_ALL & mask).nonzero?
           account_rights = GENERIC_ALL & mask
         elsif (GENERIC_RIGHTS_CHK & mask).nonzero?
           account_rights = GENERIC_RIGHTS_MASK & mask
+        else
+          # What?
         end
 
-        # all_ace_ptr->Header.AceFlags = INHERIT_ONLY_ACE|OBJECT_INHERIT_ACE
-        all_ace[1] = (INHERIT_ONLY_ACE | OBJECT_INHERIT_ACE).chr
-
-        # WHY DO I NEED THIS RUBY CORE TEAM? WHY?!?!?!?!?!?
-        all_ace.force_encoding('ASCII-8BIT') if RUBY_VERSION.to_f >= 1.9
+        all_ace[:Header][:AceFlags] = INHERIT_ONLY_ACE | OBJECT_INHERIT_ACE
 
         2.times{
           if account_rights != 0
-            all_ace[2,2] = [12 - 4 + GetLengthSid(sid)].pack('S')
-            all_ace[4,4] = [account_rights].pack('L')
+            all_ace[:Header][:AceSize] = 8 + GetLengthSid(sid)
+            all_ace[:Mask] = account_rights
 
             val = AddAce(
               acl_new,
               ACL_REVISION2,
               MAXDWORD,
               all_ace_ptr,
-              all_ace[2,2].unpack('S').first
+              all_ace[:Header][:AceSize]
             )
 
-            if val == 0
-              raise ArgumentError, get_last_error
-            end
+            raise SystemCallError.new("AddAce", FFI.errno) unless val
 
-            # all_ace_ptr->Header.AceFlags = CONTAINER_INHERIT_ACE
-            all_ace[1] = CONTAINER_INHERIT_ACE.chr
+            all_ace[:Header][:AceFlags] = CONTAINER_INHERIT_ACE
           else
-            # all_ace_ptr->Header.AceFlags = 0
-            all_ace[1] = 0.chr
+            all_ace[:Header][:AceFlags] = 0
           end
 
           account_rights = REST_RIGHTS_MASK & mask
         }
-=end
       }
 
-=begin
       unless SetSecurityDescriptorDacl(sec_desc, 1, acl_new, 0)
-        raise ArgumentError, get_last_error
+        raise SystemCallError.new("SetSecurityDescriptorDacl", FFI.errno)
       end
 
-      unless SetFileSecurityW(file, DACL_SECURITY_INFORMATION, sec_desc)
-        raise ArgumentError, get_last_error
+      unless SetFileSecurityW(wide_file, DACL_SECURITY_INFORMATION, sec_desc)
+        raise SystemCallError.new("SetFileSecurity", FFI.errno)
       end
-=end
 
       self
     end
