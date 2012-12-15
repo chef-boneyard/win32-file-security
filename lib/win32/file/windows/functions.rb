@@ -19,7 +19,7 @@ module Windows
       attach_function :InitializeSecurityDescriptor, [:pointer, :ulong], :bool
       attach_function :LookupAccountNameW, [:buffer_in, :buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
       attach_function :LookupAccountSidW, [:buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
-      attach_function :SetFileSecurity, [:buffer_in, :pointer, :pointer], :bool
+      attach_function :SetFileSecurityW, [:buffer_in, :pointer, :pointer], :bool
       attach_function :SetSecurityDescriptorDacl, [:pointer, :bool, :pointer, :bool], :bool
 
       ffi_lib :kernel32
