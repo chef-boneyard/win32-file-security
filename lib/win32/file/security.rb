@@ -272,6 +272,7 @@ class File
       end
 
       acl = ACL.new
+      acl_new = ACL.new
 
       unless InitializeAcl(acl, acl.size, ACL_REVISION2)
         raise SystemCallError.new("InitializeAcl", FFI.errno)
@@ -341,7 +342,7 @@ class File
               acl_new,
               ACL_REVISION2,
               MAXDWORD,
-              all_ace_ptr,
+              all_ace,
               all_ace[:Header][:AceSize]
             )
 
@@ -409,3 +410,4 @@ end
 
 p File.get_permissions('test.txt')
 File.set_permissions('test.txt', {"scipio\\djberge" => File::FULL})
+p File.get_permissions('test.txt')
