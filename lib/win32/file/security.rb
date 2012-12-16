@@ -271,10 +271,9 @@ class File
         raise SystemCallError.new("InitializeSecurityDescriptor", FFI.errno)
       end
 
-      acl = ACL.new
-      acl_new = ACL.new
+      acl_new = FFI::MemoryPointer.new(ACL, 100)
 
-      unless InitializeAcl(acl, acl.size, ACL_REVISION2)
+      unless InitializeAcl(acl_new, acl_new.size, ACL_REVISION2)
         raise SystemCallError.new("InitializeAcl", FFI.errno)
       end
 
@@ -291,7 +290,7 @@ class File
 
         wide_account = account.wincode
 
-        sid = FFI::MemoryPointer.new(:pointer, 1024)
+        sid = FFI::MemoryPointer.new(:uchar, 1024)
         sid_size = FFI::MemoryPointer.new(:ulong)
         sid_size.write_ulong(sid.size)
 
@@ -299,7 +298,7 @@ class File
         domain_size = FFI::MemoryPointer.new(:ulong)
         domain_size.write_ulong(domain.size)
 
-        use_ptr = FFI::MemoryPointer.new(:pointer)
+        use_ptr = FFI::MemoryPointer.new(:ulong)
 
         val = LookupAccountNameW(
            wide_server,
@@ -317,7 +316,7 @@ class File
 
         val = CopySid(
           ALLOW_ACE_LENGTH - ACCESS_ALLOWED_ACE.size,
-          all_ace,
+          all_ace.to_ptr+8,
           sid
         )
 
@@ -357,7 +356,7 @@ class File
         }
       }
 
-      unless SetSecurityDescriptorDacl(sec_desc, 1, acl_new, 0)
+      unless SetSecurityDescriptorDacl(sec_desc, true, acl_new, false)
         raise SystemCallError.new("SetSecurityDescriptorDacl", FFI.errno)
       end
 

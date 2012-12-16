@@ -8,6 +8,7 @@ module Windows
       ACL_REVISION2             = 2
       ALLOW_ACE_LENGTH          = 62
       OBJECT_INHERIT_ACE        = 0x1
+      CONTAINER_INHERIT_ACE     = 0x2
       INHERIT_ONLY_ACE          = 0x8
       MAXDWORD                  = 0xFFFFFFFF
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20
