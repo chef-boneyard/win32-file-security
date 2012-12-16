@@ -208,7 +208,6 @@ class File
           # The x2 multiplier is necessary due to wide char strings.
           name = name.read_string(name_size.read_ulong * 2).delete(0.chr)
           domain = domain.read_string(domain_size.read_ulong * 2).delete(0.chr)
-          mask =
 
           unless domain.empty?
             name = domain + '\\' + name
@@ -406,7 +405,3 @@ class File
     end
   end
 end
-
-p File.get_permissions('test.txt')
-File.set_permissions('test.txt', {"scipio\\djberge" => File::FULL})
-p File.get_permissions('test.txt')
