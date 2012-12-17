@@ -19,12 +19,25 @@ namespace :gem do
 end
 
 namespace 'test' do
+  Rake::TestTask.new('all') do |t|
+    task :test => :clean
+    t.warning = true
+    t.verbose = true
+  end
+
   Rake::TestTask.new('encryption') do |t|
     task :test => :clean
     t.warning = true
     t.verbose = true
     t.test_files = FileList['test/test_win32_file_encryption']
   end
+
+  Rake::TestTask.new('permissions') do |t|
+    task :test => :clean
+    t.warning = true
+    t.verbose = true
+    t.test_files = FileList['test/test_win32_file_permissions']
+  end
 end
 
-task :default => :test
+task :default => 'test:all'
