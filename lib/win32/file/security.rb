@@ -271,6 +271,14 @@ class File
     # * GENERIC_EXECUTE
     # * GENERIC_ALL
     #
+    # Example:
+    #
+    #   # Set locally
+    #   File.set_permissions(file, "userid" => File::GENERIC_ALL)
+    #
+    #   # Set a remote system
+    #   File.set_permissions(file, "host\\userid" => File::GENERIC_ALL)
+    #
     def set_permissions(file, perms)
       raise TypeError unless file.is_a?(String)
       raise TypeError unless perms.kind_of?(Hash)
