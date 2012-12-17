@@ -27,6 +27,11 @@ module Windows
       attach_function :GetVolumeInformationW,
         [:buffer_in, :buffer_out, :ulong, :pointer, :pointer, :pointer, :buffer_out, :ulong],
         :bool
+
+      ffi_lib :shlwapi
+
+      attach_function :PathStripToRootW, [:buffer_in], :bool
+      attach_function :PathIsRootW, [:buffer_in], :bool
     end
   end
 end

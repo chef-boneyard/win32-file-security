@@ -10,26 +10,40 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.0'
+  WIN32_FILE_SECURITY_VERSION = '0.1.0'
 
   class << self
 
-    # Returns whether or not the root path is encryptable. If no root is
-    # specified, it will check against the root of the current directory.
-    # Be sure to include a trailing slash in the root path name.
+    # Returns whether or not the root path of the specified file is
+    # encryptable. If a relative path is specified, it will check against
+    # the root of the current directory.
+    #
+    # Be sure to include a trailing slash if specifying a root path.
     #
     # Examples:
     #
     #   p File.encryptable?
     #   p File.encryptable?("D:\\")
+    #   p File.encryptable?("C:/foo/bar.txt") # Same as 'C:\'
     #
     def encryptable?(file = nil)
       bool = false
       flags_ptr = FFI::MemoryPointer.new(:ulong)
 
-      file = file.wincode if file
+      if file
+        file = File.expand_path(file)
+        wide_file = file.wincode
 
-      unless GetVolumeInformationW(file, nil, 0, nil, nil, flags_ptr, nil, 0)
+        if !PathIsRootW(wide_file)
+          unless PathStripToRootW(wide_file)
+            raise SystemCallError.new("PathStripToRoot", FFI.errno)
+          end
+        end
+      else
+        wide_file = nil
+      end
+
+      unless GetVolumeInformationW(wide_file, nil, 0, nil, nil, flags_ptr, nil, 0)
         raise SystemCallError.new("GetVolumeInformation", FFI.errno)
       end
 
@@ -326,7 +340,7 @@ class File
         elsif (GENERIC_RIGHTS_CHK & mask).nonzero?
           account_rights = GENERIC_RIGHTS_MASK & mask
         else
-          # What?
+          # Do nothing, leave it set to zero.
         end
 
         all_ace[:Header][:AceFlags] = INHERIT_ONLY_ACE | OBJECT_INHERIT_ACE
