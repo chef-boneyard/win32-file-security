@@ -95,6 +95,15 @@ module Windows
       FILE_SUPPORTS_OBJECT_IDS       = 0x10000
       FILE_SUPPORTS_ENCRYPTION       = 0x20000
 
+      FILE_ENCRYPTABLE  = 0
+      FILE_IS_ENCRYPTED = 1
+      FILE_ROOT_DIR     = 3
+      FILE_SYSTEM_ATTR  = 2
+      FILE_SYSTEM_DIR   = 4
+      FILE_UNKNOWN      = 5
+      FILE_SYSTEM_NOT_SUPPORT = 6
+      FILE_READ_ONLY    = 8
+
       # Read and execute privileges
       READ = FILE_GENERIC_READ | FILE_EXECUTE
 

@@ -10,6 +10,7 @@ module Windows
       attach_function :CopySid, [:ulong, :pointer, :pointer], :bool
       attach_function :EncryptFileW, [:buffer_in], :bool
       attach_function :DecryptFileW, [:buffer_in, :ulong], :bool
+      attach_function :FileEncryptionStatusW, [:buffer_in, :pointer], :bool
       attach_function :GetAce, [:pointer, :ulong, :pointer], :bool
       attach_function :GetFileSecurityW, [:buffer_in, :ulong, :pointer, :ulong, :pointer], :bool
       attach_function :GetLengthSid, [:pointer], :ulong

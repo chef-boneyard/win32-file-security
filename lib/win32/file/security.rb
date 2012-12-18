@@ -14,6 +14,47 @@ class File
 
   class << self
 
+    # Returns the encryption status of a file as a string. Possible return
+    # values are:
+    #
+    # * encryptable
+    # * encrypted
+    # * readonly
+    # * root directory (i.e. not encryptable)
+    # * system fiel (i.e. not encryptable)
+    # * unsupported
+    # * unknown
+    #
+    def encryption_status(file)
+      wide_file  = file.wincode
+      status_ptr = FFI::MemoryPointer.new(:ulong)
+
+      unless FileEncryptionStatusW(wide_file, status_ptr)
+        raise SystemCallError.new("FileEncryptionStatus", FFI.errno)
+      end
+
+      status = status_ptr.read_ulong
+
+      rvalue = case status
+        when FILE_ENCRYPTABLE
+          "encryptable"
+        when FILE_IS_ENCRYPTED
+          "encrypted"
+        when FILE_READ_ONLY
+          "readonly"
+        when FILE_ROOT_DIR
+          "root directory"
+        when FILE_SYSTEM_ATTR
+          "system file"
+        when FILE_SYSTEM_NOT_SUPPORTED
+          "unsupported"
+        else
+          "unknown"
+      end
+
+      rvalue
+    end
+
     # Returns whether or not the root path of the specified file is
     # encryptable. If a relative path is specified, it will check against
     # the root of the current directory.
@@ -427,3 +468,5 @@ class File
     end
   end
 end
+
+p File.encryption_status('test.txt')
