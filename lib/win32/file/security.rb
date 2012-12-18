@@ -333,7 +333,7 @@ class File
 
         raise SystemCallError.new("LookupAccountName", FFI.errno) unless val
 
-        all_ace = ACCESS_ALLOWED_ACE.new
+        all_ace = ACCESS_ALLOWED_ACE2.new
 
         val = CopySid(
           ALLOW_ACE_LENGTH - ACCESS_ALLOWED_ACE.size,
