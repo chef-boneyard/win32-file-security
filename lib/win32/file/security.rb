@@ -468,5 +468,3 @@ class File
     end
   end
 end
-
-p File.encryption_status('test.txt')
