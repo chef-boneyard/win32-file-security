@@ -11,7 +11,7 @@ require 'win32/security'
 require 'win32/file/security'
 require 'socket'
 
-class TC_Win32_File_Encryption < Test::Unit::TestCase
+class TC_Win32_File_Security_Encryption < Test::Unit::TestCase
   def self.startup
     Dir.chdir(File.dirname(File.expand_path(File.basename(__FILE__))))
     @@file = File.join(Dir.pwd, 'encryption_test.txt')

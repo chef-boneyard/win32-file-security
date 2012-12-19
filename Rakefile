@@ -29,14 +29,14 @@ namespace 'test' do
     task :test => :clean
     t.warning = true
     t.verbose = true
-    t.test_files = FileList['test/test_win32_file_encryption']
+    t.test_files = FileList['test/test_win32_file_security_encryption']
   end
 
   Rake::TestTask.new('permissions') do |t|
     task :test => :clean
     t.warning = true
     t.verbose = true
-    t.test_files = FileList['test/test_win32_file_permissions']
+    t.test_files = FileList['test/test_win32_file_security_permissions']
   end
 end
 
