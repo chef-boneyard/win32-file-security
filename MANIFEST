@@ -1,0 +1,12 @@
+* CHANGES
+* MANIFEST
+* Rakefile
+* README
+* win32-file-security.gemspec
+* lib/win32/file/security.rb
+* lib/win32/file/windows/constants.rb
+* lib/win32/file/windows/functions.rb
+* lib/win32/file/windows/structs.rb
+* test/test_win32_file_security_encryption.rb
+* test/test_win32_file_security_permissions.rb
+* test/test_win32_file_security_version.rb
