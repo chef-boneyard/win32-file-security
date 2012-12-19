@@ -1,0 +1,45 @@
+== Description
+  Additional methods for the File class that relate to file security on
+  the Microsoft Windows operating system.
+
+== Prerequisites
+  * ffi
+
+== Installation
+  gem install win32-file-security
+
+== Synopsis
+
+  require 'win32/file/security
+
+  p File.get_permissions('file.txt')
+
+== Notes
+  If you have the win32-file gem already installed then you do not need this
+  gem. This library was split out from the win32-file gem in order to ease
+  testing and maintenance.
+
+  Otherwise, the only difference is that this library uses FFI instead
+  of win32-api. This also means that it works with JRuby.
+
+== Known issues or bugs
+  None that I'm aware of.
+
+  Please report any issues you find on the github page at:
+
+  https://github.com/djberg96/win32-file-security/issues
+  
+== License
+  Artistic 2.0
+
+== Copyright
+  (C) 2003-2012, Daniel J. Berger, All Rights Reserved
+
+== Warranty
+  This package is provided "as is" and without any express or
+  implied warranties, including, without limitation, the implied
+  warranties of merchantability and fitness for a particular purpose.
+
+== Authors
+  * Daniel J. Berger
+  * Park Heesob
