@@ -24,7 +24,7 @@ module Windows
           :Header, ACE_HEADER,
           :Mask, :ulong,
           :SidStart, :ulong,
-	  :dummy, [:uchar, 40]
+          :dummy, [:uchar, 40]
         )
       end
 

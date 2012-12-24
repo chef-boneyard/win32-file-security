@@ -1,16 +1,19 @@
 module Windows
   module File
     module Constants
-      SE_DACL_PRESENT           = 4
-      DACL_SECURITY_INFORMATION = 4
-      ACCESS_ALLOWED_ACE_TYPE   = 0
-      ERROR_INSUFFICIENT_BUFFER = 122
-      ACL_REVISION2             = 2
-      ALLOW_ACE_LENGTH          = 62
-      OBJECT_INHERIT_ACE        = 0x1
-      CONTAINER_INHERIT_ACE     = 0x2
-      INHERIT_ONLY_ACE          = 0x8
-      MAXDWORD                  = 0xFFFFFFFF
+      SE_DACL_PRESENT            = 4
+      OWNER_SECURITY_INFORMATION = 1
+      DACL_SECURITY_INFORMATION  = 4
+      ACCESS_ALLOWED_ACE_TYPE    = 0
+      ERROR_INSUFFICIENT_BUFFER  = 122
+      ACL_REVISION2              = 2
+      ALLOW_ACE_LENGTH           = 62
+      OBJECT_INHERIT_ACE         = 0x1
+      CONTAINER_INHERIT_ACE      = 0x2
+      INHERIT_ONLY_ACE           = 0x8
+      MAXDWORD                   = 0xFFFFFFFF
+      TOKEN_QUERY                = 0x00000008
+      TokenUser                  = 1
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20
 
       ## Security Rights

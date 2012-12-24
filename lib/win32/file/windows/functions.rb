@@ -15,16 +15,20 @@ module Windows
       attach_function :GetFileSecurityW, [:buffer_in, :ulong, :pointer, :ulong, :pointer], :bool
       attach_function :GetLengthSid, [:pointer], :ulong
       attach_function :GetSecurityDescriptorControl, [:pointer, :pointer, :pointer], :bool
+      attach_function :GetSecurityDescriptorOwner, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorDacl, [:pointer, :pointer, :pointer, :pointer], :ulong
+      attach_function :GetTokenInformation, [:ulong, :int, :pointer, :ulong, :pointer], :bool
       attach_function :InitializeAcl, [:pointer, :ulong, :ulong], :bool
       attach_function :InitializeSecurityDescriptor, [:pointer, :ulong], :bool
       attach_function :LookupAccountNameW, [:buffer_in, :buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
       attach_function :LookupAccountSidW, [:buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
+      attach_function :OpenProcessToken, [:ulong, :ulong, :pointer], :bool
       attach_function :SetFileSecurityW, [:buffer_in, :ulong, :pointer], :bool
       attach_function :SetSecurityDescriptorDacl, [:pointer, :bool, :pointer, :bool], :bool
 
       ffi_lib :kernel32
 
+      attach_function :GetCurrentProcess, [], :ulong
       attach_function :GetVolumeInformationW,
         [:buffer_in, :buffer_out, :ulong, :pointer, :pointer, :pointer, :buffer_out, :ulong],
         :bool

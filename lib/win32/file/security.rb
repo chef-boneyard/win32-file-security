@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), 'windows', 'constants')
 require File.join(File.dirname(__FILE__), 'windows', 'structs')
 require File.join(File.dirname(__FILE__), 'windows', 'functions')
+require 'socket'
 
 class File
   include Windows::File::Constants
@@ -465,6 +466,91 @@ class File
       end
 
       sec_array
+    end
+
+    # Returns true if the effective user ID of the process is the same as the
+    # owner of the named file.
+    #--
+    # This method was redefined for MS Windows.
+    #
+    def owned?(file)
+      return_value = false
+      wide_file = file.wincode
+      size_needed_ptr = FFI::MemoryPointer.new(:ulong)
+
+      # First pass, get the size needed
+      bool = GetFileSecurityW(
+        wide_file,
+        OWNER_SECURITY_INFORMATION,
+        nil,
+        0,
+        size_needed_ptr
+      )
+
+      size_needed = size_needed_ptr.read_ulong
+
+      security_ptr = FFI::MemoryPointer.new(size_needed)
+
+      # Second pass, this time with the appropriately sized security pointer
+      bool = GetFileSecurityW(
+        wide_file,
+        OWNER_SECURITY_INFORMATION,
+        security_ptr,
+        security_ptr.size,
+        size_needed_ptr
+      )
+
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+
+      sid_ptr = FFI::MemoryPointer.new(:pointer)
+      defaulted = FFI::MemoryPointer.new(:bool)
+
+      unless GetSecurityDescriptorOwner(security_ptr, sid_ptr, defaulted)
+        raise SystemCallError.new("GetFileSecurity", FFI.errno)
+      end
+
+      name = FFI::MemoryPointer.new(:uchar, 260)
+      name_size = FFI::MemoryPointer.new(:ulong)
+      name_size.write_ulong(name.size)
+
+      domain = FFI::MemoryPointer.new(:uchar, 260)
+      domain_size = FFI::MemoryPointer.new(:ulong)
+      domain_size.write_ulong(domain.size)
+
+      use_ptr = FFI::MemoryPointer.new(:pointer)
+      sid = sid_ptr.read_pointer
+
+      token = FFI::MemoryPointer.new(:ulong)
+
+      # Get the current process sid
+      unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
+        raise SystemCallError, FFI.errno, "OpenProcessToken"
+      end
+
+      token   = token.read_ulong
+      rlength = FFI::MemoryPointer.new(:ulong)
+      tuser   = 0.chr * 512
+
+      bool = GetTokenInformation(
+        token,
+        TokenUser,
+        tuser,
+        tuser.size,
+        rlength
+      )
+
+      unless bool
+        raise SystemCallError, FFI.errno, "GetTokenInformation"
+      end
+
+      string_sid = tuser[8, (rlength.read_ulong - 8)]
+
+      # Now compare the sid strings
+      if string_sid == sid.read_string(string_sid.size)
+        return_value = true
+      end
+
+      return_value
     end
   end
 end
