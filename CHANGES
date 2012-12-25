@@ -1,2 +1,5 @@
+= 1.0.1 - ???
+* Added a working implementation of File.owned?
+
 = 1.0.0 - 19-Dec-2012
 * Initial release as an independent library.
