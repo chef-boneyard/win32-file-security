@@ -7,6 +7,7 @@ module Windows
       ffi_lib :advapi32
 
       attach_function :AddAce, [:pointer, :ulong, :ulong, :pointer, :ulong], :bool
+      attach_function :AdjustTokenPrivileges, [:ulong, :bool, :pointer, :ulong, :pointer, :pointer], :bool
       attach_function :CopySid, [:ulong, :pointer, :pointer], :bool
       attach_function :EncryptFileW, [:buffer_in], :bool
       attach_function :DecryptFileW, [:buffer_in, :ulong], :bool
@@ -17,14 +18,17 @@ module Windows
       attach_function :GetSecurityDescriptorControl, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorOwner, [:pointer, :pointer, :pointer], :bool
       attach_function :GetSecurityDescriptorDacl, [:pointer, :pointer, :pointer, :pointer], :ulong
+      attach_function :GetSecurityInfo, [:ulong, :ulong, :ulong, :pointer, :pointer, :pointer, :pointer, :pointer], :ulong
       attach_function :GetTokenInformation, [:ulong, :int, :pointer, :ulong, :pointer], :bool
       attach_function :InitializeAcl, [:pointer, :ulong, :ulong], :bool
       attach_function :InitializeSecurityDescriptor, [:pointer, :ulong], :bool
       attach_function :LookupAccountNameW, [:buffer_in, :buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
       attach_function :LookupAccountSidW, [:buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
+      attach_function :LookupPrivilegeValueW, [:buffer_in, :buffer_in, :pointer], :bool
       attach_function :OpenProcessToken, [:ulong, :ulong, :pointer], :bool
       attach_function :SetFileSecurityW, [:buffer_in, :ulong, :pointer], :bool
       attach_function :SetSecurityDescriptorDacl, [:pointer, :bool, :pointer, :bool], :bool
+      attach_function :SetSecurityDescriptorOwner, [:pointer, :pointer, :bool], :bool
 
       ffi_lib :kernel32
 

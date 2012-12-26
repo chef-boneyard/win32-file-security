@@ -14,6 +14,10 @@ module Windows
       MAXDWORD                   = 0xFFFFFFFF
       TOKEN_QUERY                = 0x00000008
       TokenUser                  = 1
+      SE_KERNEL_OBJECT           = 6
+      SE_FILE_OBJECT             = 1
+
+      SECURITY_DESCRIPTOR_REVISION   = 1
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20
 
       ## Security Rights

@@ -468,6 +468,9 @@ class File
       sec_array
     end
 
+    def chown(owner, group, *files)
+    end
+
     # Returns true if the effective user ID of the process is the same as the
     # owner of the named file.
     #--
@@ -554,3 +557,5 @@ class File
     end
   end
 end
+
+File.chown('postgres', nil, 'test.txt')
