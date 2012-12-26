@@ -469,6 +469,36 @@ class File
     end
 
     def chown(owner, group, *files)
+      token = FFI::MemoryPointer.new(:ulong)
+
+      begin
+        bool = OpenProcessToken(
+          GetCurrentProcess(),
+          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+          token
+        )
+
+        raise SystemCallError.new("OpenProcessToken", FFI.errno) unless bool
+
+        token_handle = token.read_ulong
+
+        luid = LUID.new
+
+        unless LookupPrivilegeValueA(nil, SE_RESTORE_NAME, luid)
+          raise SystemCallError.new("LookupPrivilegeValue", FFI.errno)
+        end
+
+        tp = TOKEN_PRIVILEGES.new
+        tp[:PrivilegeCount] = 1
+        tp[:Privileges][0][:Luid] = luid
+        tp[:Privileges][0][:Attributes] = SE_PRIVILEGE_ENABLED
+
+        unless AdjustTokenPrivileges(token_handle, false, tp, 0, nil, nil)
+          raise SystemCallError.new("AdjustTokenPrivileges", FFI.errno)
+        end
+      ensure
+        CloseHandle(token.read_ulong)
+      end
     end
 
     # Returns true if the effective user ID of the process is the same as the
@@ -558,4 +588,4 @@ class File
   end
 end
 
-File.chown('postgres', nil, 'test.txt')
+File.chown(1008, nil, 'test.txt')

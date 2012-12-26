@@ -24,7 +24,7 @@ module Windows
       attach_function :InitializeSecurityDescriptor, [:pointer, :ulong], :bool
       attach_function :LookupAccountNameW, [:buffer_in, :buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
       attach_function :LookupAccountSidW, [:buffer_in, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :bool
-      attach_function :LookupPrivilegeValueW, [:buffer_in, :buffer_in, :pointer], :bool
+      attach_function :LookupPrivilegeValueA, [:string, :string, :pointer], :bool
       attach_function :OpenProcessToken, [:ulong, :ulong, :pointer], :bool
       attach_function :SetFileSecurityW, [:buffer_in, :ulong, :pointer], :bool
       attach_function :SetSecurityDescriptorDacl, [:pointer, :bool, :pointer, :bool], :bool
@@ -32,6 +32,7 @@ module Windows
 
       ffi_lib :kernel32
 
+      attach_function :CloseHandle, [:ulong], :bool
       attach_function :GetCurrentProcess, [], :ulong
       attach_function :GetVolumeInformationW,
         [:buffer_in, :buffer_out, :ulong, :pointer, :pointer, :pointer, :buffer_out, :ulong],

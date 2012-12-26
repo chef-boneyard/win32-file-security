@@ -13,12 +13,19 @@ module Windows
       INHERIT_ONLY_ACE           = 0x8
       MAXDWORD                   = 0xFFFFFFFF
       TOKEN_QUERY                = 0x00000008
+      TOKEN_ADJUST_PRIVILEGES    = 0x0020
       TokenUser                  = 1
-      SE_KERNEL_OBJECT           = 6
-      SE_FILE_OBJECT             = 1
 
       SECURITY_DESCRIPTOR_REVISION   = 1
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20
+
+      SE_KERNEL_OBJECT       = 6
+      SE_FILE_OBJECT         = 1
+      SE_PRIVILEGE_ENABLED   = 0x00000002
+      SE_SECURITY_NAME       = "SeSecurityPrivilege"
+      SE_TAKE_OWNERSHIP_NAME = "SeTakeOwnershipPrivilege"
+      SE_BACKUP_NAME         = "SeBackupPrivilege"
+      SE_RESTORE_NAME        = "SeRestorePrivilege"
 
       ## Security Rights
 
