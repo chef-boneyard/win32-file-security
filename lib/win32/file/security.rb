@@ -11,7 +11,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.0'
+  WIN32_FILE_SECURITY_VERSION = '1.0.1'
 
   class << self
 
@@ -468,39 +468,6 @@ class File
       sec_array
     end
 
-    def chown(owner, group, *files)
-      token = FFI::MemoryPointer.new(:ulong)
-
-      begin
-        bool = OpenProcessToken(
-          GetCurrentProcess(),
-          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
-          token
-        )
-
-        raise SystemCallError.new("OpenProcessToken", FFI.errno) unless bool
-
-        token_handle = token.read_ulong
-
-        luid = LUID.new
-
-        unless LookupPrivilegeValueA(nil, SE_RESTORE_NAME, luid)
-          raise SystemCallError.new("LookupPrivilegeValue", FFI.errno)
-        end
-
-        tp = TOKEN_PRIVILEGES.new
-        tp[:PrivilegeCount] = 1
-        tp[:Privileges][0][:Luid] = luid
-        tp[:Privileges][0][:Attributes] = SE_PRIVILEGE_ENABLED
-
-        unless AdjustTokenPrivileges(token_handle, false, tp, 0, nil, nil)
-          raise SystemCallError.new("AdjustTokenPrivileges", FFI.errno)
-        end
-      ensure
-        CloseHandle(token.read_ulong)
-      end
-    end
-
     # Returns true if the effective user ID of the process is the same as the
     # owner of the named file.
     #--
@@ -585,7 +552,96 @@ class File
 
       return_value
     end
+
+    def chown(owner, group, *files)
+      token = FFI::MemoryPointer.new(:ulong)
+
+      begin
+        bool = OpenProcessToken(
+          GetCurrentProcess(),
+          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+          token
+        )
+
+        raise SystemCallError.new("OpenProcessToken", FFI.errno) unless bool
+
+        token_handle = token.read_ulong
+
+        [SE_SECURITY_NAME, SE_TAKE_OWNERSHIP_NAME, SE_BACKUP_NAME, SE_RESTORE_NAME].each{ |name|
+          luid = LUID.new
+
+          unless LookupPrivilegeValueA(nil, name, luid)
+            raise SystemCallError.new("LookupPrivilegeValue", FFI.errno)
+          end
+
+          tp = TOKEN_PRIVILEGES.new
+          tp[:PrivilegeCount] = 1
+          tp[:Privileges][0][:Luid] = luid
+          tp[:Privileges][0][:Attributes] = SE_PRIVILEGE_ENABLED
+
+          unless AdjustTokenPrivileges(token_handle, false, tp, 0, nil, nil)
+            raise SystemCallError.new("AdjustTokenPrivileges", FFI.errno)
+          end
+        }
+
+        files.each{ |file|
+          wfile = file.wincode
+
+          size = FFI::MemoryPointer.new(:ulong)
+          sec  = FFI::MemoryPointer.new(:ulong)
+
+          # First pass, get the size needed
+          GetFileSecurityW(wfile, OWNER_SECURITY_INFORMATION, sec, sec.size, size)
+
+          security = FFI::MemoryPointer.new(size.read_ulong)
+
+          # Second pass, this time with the appropriately sized security pointer
+          bool = GetFileSecurityW(
+            wfile,
+            OWNER_SECURITY_INFORMATION,
+            security,
+            security.size,
+            size
+          )
+
+          raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+
+          unless InitializeSecurityDescriptor(security, SECURITY_DESCRIPTOR_REVISION)
+            raise SystemCallError.new("InitializeSecurityDescriptor", FFI.errno)
+          end
+
+          sid      = FFI::MemoryPointer.new(:uchar)
+          sid_size = FFI::MemoryPointer.new(:ulong)
+          dom      = FFI::MemoryPointer.new(:uchar)
+          dom_size = FFI::MemoryPointer.new(:ulong)
+          use      = FFI::MemoryPointer.new(:ulong)
+
+          wowner = owner.wincode
+
+          # First run, get needed sizes
+          LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
+
+          sid = FFI::MemoryPointer.new(:uchar, sid_size.read_ulong * 2)
+          dom = FFI::MemoryPointer.new(:uchar, dom_size.read_ulong * 2)
+
+          # Second run with required sizes
+          unless LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
+            raise SystemCallError.new("LookupAccountName", FFI.errno)
+          end
+
+          unless SetSecurityDescriptorOwner(security, sid, false)
+            raise SystemCallError.new("SetSecurityDescriptorOwner", FFI.errno)
+          end
+
+          unless SetFileSecurityW(wfile, OWNER_SECURITY_INFORMATION, security)
+            raise SystemCallError.new("SetFileSecurity", FFI.errno)
+          end
+        }
+      ensure
+        CloseHandle(token.read_ulong)
+      end
+    end
   end
 end
 
-File.chown(1008, nil, 'test.txt')
+File.chown('postgres', nil, 'test.txt')
