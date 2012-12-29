@@ -567,7 +567,7 @@ class File
 
         token_handle = token.read_ulong
 
-        [SE_SECURITY_NAME, SE_TAKE_OWNERSHIP_NAME, SE_BACKUP_NAME, SE_RESTORE_NAME].each{ |name|
+        [SE_SECURITY_NAME, SE_TAKE_OWNERSHIP_NAME, SE_BACKUP_NAME, SE_RESTORE_NAME, SE_CHANGE_NOTIFY_NAME].each{ |name|
           luid = LUID.new
 
           unless LookupPrivilegeValueA(nil, name, luid)
@@ -583,6 +583,25 @@ class File
             raise SystemCallError.new("AdjustTokenPrivileges", FFI.errno)
           end
         }
+
+        sid      = FFI::MemoryPointer.new(:uchar)
+        sid_size = FFI::MemoryPointer.new(:ulong)
+        dom      = FFI::MemoryPointer.new(:uchar)
+        dom_size = FFI::MemoryPointer.new(:ulong)
+        use      = FFI::MemoryPointer.new(:ulong)
+
+        wowner = owner.wincode
+
+        # First run, get needed sizes
+        LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
+
+        sid = FFI::MemoryPointer.new(:uchar, sid_size.read_ulong * 2)
+        dom = FFI::MemoryPointer.new(:uchar, dom_size.read_ulong * 2)
+
+        # Second run with required sizes
+        unless LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
+          raise SystemCallError.new("LookupAccountName", FFI.errno)
+        end
 
         files.each{ |file|
           wfile = file.wincode
@@ -608,25 +627,6 @@ class File
 
           unless InitializeSecurityDescriptor(security, SECURITY_DESCRIPTOR_REVISION)
             raise SystemCallError.new("InitializeSecurityDescriptor", FFI.errno)
-          end
-
-          sid      = FFI::MemoryPointer.new(:uchar)
-          sid_size = FFI::MemoryPointer.new(:ulong)
-          dom      = FFI::MemoryPointer.new(:uchar)
-          dom_size = FFI::MemoryPointer.new(:ulong)
-          use      = FFI::MemoryPointer.new(:ulong)
-
-          wowner = owner.wincode
-
-          # First run, get needed sizes
-          LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
-
-          sid = FFI::MemoryPointer.new(:uchar, sid_size.read_ulong * 2)
-          dom = FFI::MemoryPointer.new(:uchar, dom_size.read_ulong * 2)
-
-          # Second run with required sizes
-          unless LookupAccountNameW(nil, wowner, sid, sid_size, dom, dom_size, use)
-            raise SystemCallError.new("LookupAccountName", FFI.errno)
           end
 
           unless SetSecurityDescriptorOwner(security, sid, false)

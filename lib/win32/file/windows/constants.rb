@@ -26,6 +26,7 @@ module Windows
       SE_TAKE_OWNERSHIP_NAME = "SeTakeOwnershipPrivilege"
       SE_BACKUP_NAME         = "SeBackupPrivilege"
       SE_RESTORE_NAME        = "SeRestorePrivilege"
+      SE_CHANGE_NOTIFY_NAME  = "SeChangeNotifyPrivilege"
 
       ## Security Rights
 
