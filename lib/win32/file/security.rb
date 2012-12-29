@@ -553,6 +553,17 @@ class File
       return_value
     end
 
+    # Changes the owner of the named file(s) to the given owner (userid).
+    # It will typically require elevated privileges in order to change the
+    # owner of a file.
+    #
+    # This group argument is currently ignored, but is included in the method
+    # definition for compatibility with the current spec. Also note that the
+    # owner should be a string, not a numeric ID.
+    #--
+    # In the future we may allow the owner argument to be a SID or a RID and
+    # simply adjust accordingly.
+    #
     def chown(owner, group, *files)
       token = FFI::MemoryPointer.new(:ulong)
 
@@ -642,6 +653,8 @@ class File
       end
     end
 
+    # Returns the owner of the specified file in domain\\userid format.
+    #
     def owner(file)
       size_needed = FFI::MemoryPointer.new(:ulong)
 
