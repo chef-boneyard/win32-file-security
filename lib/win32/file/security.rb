@@ -641,7 +641,67 @@ class File
         CloseHandle(token.read_ulong)
       end
     end
+
+    def owner(file)
+      size_needed = FFI::MemoryPointer.new(:ulong)
+
+      # First pass, get the size needed
+      bool = GetFileSecurityW(
+        file.wincode,
+        OWNER_SECURITY_INFORMATION,
+        nil,
+        0,
+        size_needed
+      )
+
+      security = FFI::MemoryPointer.new(size_needed.read_ulong)
+
+      # Second pass, this time with the appropriately sized security pointer
+      bool = GetFileSecurityW(
+        file.wincode,
+        OWNER_SECURITY_INFORMATION,
+        security,
+        security.size,
+        size_needed
+      )
+
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+
+      sid = FFI::MemoryPointer.new(:pointer)
+      defaulted = FFI::MemoryPointer.new(:bool)
+
+      unless GetSecurityDescriptorOwner(security, sid, defaulted)
+        raise SystemCallError.new("GetFileSecurity", FFI.errno)
+      end
+
+      sid = sid.read_pointer
+
+      name = FFI::MemoryPointer.new(:uchar, 260)
+      name_size = FFI::MemoryPointer.new(:ulong)
+      name_size.write_ulong(name.size)
+
+      domain = FFI::MemoryPointer.new(:uchar, 260)
+      domain_size = FFI::MemoryPointer.new(:ulong)
+      domain_size.write_ulong(domain.size)
+
+      use_ptr = FFI::MemoryPointer.new(:pointer)
+
+      bool = LookupAccountSidW(
+        nil,
+        sid,
+        name,
+        name_size,
+        domain,
+        domain_size,
+        use_ptr
+      )
+
+      raise SystemCallError.new("LookupAccountSid", FFI.errno) unless bool
+
+      name = name.read_string(name_size.read_ulong * 2).tr(0.chr, '')
+      domain = domain.read_string(domain_size.read_ulong * 2).tr(0.chr, '')
+
+      domain << "\\" << name
+    end
   end
 end
-
-File.chown('postgres', nil, 'test.txt')
