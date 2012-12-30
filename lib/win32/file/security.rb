@@ -14,6 +14,8 @@ class File
   WIN32_FILE_SECURITY_VERSION = '1.0.1'
 
   class << self
+    remove_method(:owned?)
+    remove_method(:chown)
 
     # Returns the encryption status of a file as a string. Possible return
     # values are:
@@ -509,45 +511,40 @@ class File
         raise SystemCallError.new("GetFileSecurity", FFI.errno)
       end
 
-      name = FFI::MemoryPointer.new(:uchar, 260)
-      name_size = FFI::MemoryPointer.new(:ulong)
-      name_size.write_ulong(name.size)
-
-      domain = FFI::MemoryPointer.new(:uchar, 260)
-      domain_size = FFI::MemoryPointer.new(:ulong)
-      domain_size.write_ulong(domain.size)
-
-      use_ptr = FFI::MemoryPointer.new(:pointer)
       sid = sid_ptr.read_pointer
 
       token = FFI::MemoryPointer.new(:ulong)
 
-      # Get the current process sid
-      unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
-        raise SystemCallError, FFI.errno, "OpenProcessToken"
-      end
+      begin
+        # Get the current process sid
+        unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
+          raise SystemCallError, FFI.errno, "OpenProcessToken"
+        end
 
-      token   = token.read_ulong
-      rlength = FFI::MemoryPointer.new(:ulong)
-      tuser   = 0.chr * 512
+        token   = token.read_ulong
+        rlength = FFI::MemoryPointer.new(:ulong)
+        tuser   = 0.chr * 512
 
-      bool = GetTokenInformation(
-        token,
-        TokenUser,
-        tuser,
-        tuser.size,
-        rlength
-      )
+        bool = GetTokenInformation(
+          token,
+          TokenUser,
+          tuser,
+          tuser.size,
+          rlength
+        )
 
-      unless bool
-        raise SystemCallError, FFI.errno, "GetTokenInformation"
-      end
+        unless bool
+          raise SystemCallError, FFI.errno, "GetTokenInformation"
+        end
 
-      string_sid = tuser[8, (rlength.read_ulong - 8)]
+        string_sid = tuser[8, (rlength.read_ulong - 8)]
 
-      # Now compare the sid strings
-      if string_sid == sid.read_string(string_sid.size)
-        return_value = true
+        # Now compare the sid strings
+        if string_sid == sid.read_string(string_sid.size)
+          return_value = true
+        end
+      ensure
+        CloseHandle(token)
       end
 
       return_value
