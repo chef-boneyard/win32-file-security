@@ -575,7 +575,15 @@ class File
 
         token_handle = token.read_ulong
 
-        [SE_SECURITY_NAME, SE_TAKE_OWNERSHIP_NAME, SE_BACKUP_NAME, SE_RESTORE_NAME, SE_CHANGE_NOTIFY_NAME].each{ |name|
+        privs = [
+          SE_SECURITY_NAME,
+          SE_TAKE_OWNERSHIP_NAME,
+          SE_BACKUP_NAME,
+          SE_RESTORE_NAME,
+          SE_CHANGE_NOTIFY_NAME
+        ]
+
+        privs.each{ |name|
           luid = LUID.new
 
           unless LookupPrivilegeValueA(nil, name, luid)
