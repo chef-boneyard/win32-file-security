@@ -660,6 +660,8 @@ class File
       ensure
         CloseHandle(token.read_ulong)
       end
+
+      files.size
     end
 
     # Returns the owner of the specified file in domain\\userid format.
