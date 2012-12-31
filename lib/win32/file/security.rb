@@ -191,9 +191,7 @@ class File
         size_needed_ptr
       )
 
-      unless bool
-        raise SystemCallError.new("GetFileSecurity", FFI.errno)
-      end
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       control_ptr  = FFI::MemoryPointer.new(:ulong)
       revision_ptr = FFI::MemoryPointer.new(:ulong)
@@ -249,7 +247,7 @@ class File
 
           use_ptr = FFI::MemoryPointer.new(:pointer)
 
-          val = LookupAccountSidW(
+          bool = LookupAccountSidW(
             wide_host,
             ace_pptr.read_pointer + 8,
             name,
@@ -259,9 +257,7 @@ class File
             use_ptr
           )
 
-          if val == 0
-            raise SystemCallError.new("LookupAccountSid", FFI.errno)
-          end
+          raise SystemCallError.new("LookupAccountSid", FFI.errno) unless bool
 
           # The x2 multiplier is necessary due to wide char strings.
           name = name.read_string(name_size.read_ulong * 2).delete(0.chr)
@@ -292,7 +288,6 @@ class File
     # * FILE_DELETE_CHILD
     # * FILE_READ_ATTRIBUTES
     # * FILE_WRITE_ATTRIBUTES
-    # * STANDARD_RIGHTS_ALL
     # * FULL
     # * READ
     # * ADD
@@ -302,11 +297,11 @@ class File
     # * WRITE_DAC
     # * WRITE_OWNER
     # * SYNCHRONIZE
+    # * STANDARD_RIGHTS_ALL
     # * STANDARD_RIGHTS_REQUIRED
     # * STANDARD_RIGHTS_READ
     # * STANDARD_RIGHTS_WRITE
     # * STANDARD_RIGHTS_EXECUTE
-    # * STANDARD_RIGHTS_ALL
     # * SPECIFIC_RIGHTS_ALL
     # * ACCESS_SYSTEM_SECURITY
     # * MAXIMUM_ALLOWED
@@ -472,6 +467,11 @@ class File
 
     # Returns true if the effective user ID of the process is the same as the
     # owner of the named file.
+    #
+    # Example:
+    #
+    #   p File.owned?('some_file.txt') # => true
+    #   p File.owned?('C:/Windows/regedit.ext') # => false
     #--
     # This method was redefined for MS Windows.
     #
@@ -557,6 +557,10 @@ class File
     # This group argument is currently ignored, but is included in the method
     # definition for compatibility with the current spec. Also note that the
     # owner should be a string, not a numeric ID.
+    #
+    # Example:
+    #
+    #   File.chown('some_user', nil, 'some_file.txt')
     #--
     # In the future we may allow the owner argument to be a SID or a RID and
     # simply adjust accordingly.
@@ -660,6 +664,10 @@ class File
 
     # Returns the owner of the specified file in domain\\userid format.
     #
+    # Example:
+    #
+    #   p File.owner('some_file.txt') # => "your_domain\\some_user"
+    #
     def owner(file)
       size_needed = FFI::MemoryPointer.new(:ulong)
 
@@ -694,6 +702,7 @@ class File
 
       sid = sid.read_pointer
 
+      # TODO: Do a double pass to get the actual size
       name = FFI::MemoryPointer.new(:uchar, 260)
       name_size = FFI::MemoryPointer.new(:ulong)
       name_size.write_ulong(name.size)
