@@ -25,6 +25,13 @@ namespace 'test' do
     t.verbose = true
   end
 
+  Rake::TestTask.new('constants') do |t|
+    task :test => :clean
+    t.warning = true
+    t.verbose = true
+    t.test_files = FileList['test/test_win32_file_security_constants']
+  end
+
   Rake::TestTask.new('encryption') do |t|
     task :test => :clean
     t.warning = true

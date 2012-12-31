@@ -45,6 +45,9 @@ module Windows
       GENERIC_ALL                  = 0x10000000
       GENERIC_RIGHTS_CHK           = 0xF0000000
       REST_RIGHTS_MASK             = 0x001FFFFF
+      READ_CONTROL                 = 0x20000
+      WRITE_DAC                    = 0x40000
+      WRITE_OWNER                  = 0x80000
 
       FILE_READ_DATA               = 1
       FILE_LIST_DIRECTORY          = 1
