@@ -702,31 +702,25 @@ class File
 
       sid = sid.read_pointer
 
-      # TODO: Do a double pass to get the actual size
-      name = FFI::MemoryPointer.new(:uchar, 260)
+      name      = FFI::MemoryPointer.new(:uchar)
       name_size = FFI::MemoryPointer.new(:ulong)
-      name_size.write_ulong(name.size)
+      dom       = FFI::MemoryPointer.new(:uchar)
+      dom_size  = FFI::MemoryPointer.new(:ulong)
+      use       = FFI::MemoryPointer.new(:pointer)
 
-      domain = FFI::MemoryPointer.new(:uchar, 260)
-      domain_size = FFI::MemoryPointer.new(:ulong)
-      domain_size.write_ulong(domain.size)
+      # First call, get sizes needed
+      LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
 
-      use_ptr = FFI::MemoryPointer.new(:pointer)
+      name = FFI::MemoryPointer.new(:uchar, name_size.read_ulong * 2)
+      dom  = FFI::MemoryPointer.new(:uchar, dom_size.read_ulong * 2)
 
-      bool = LookupAccountSidW(
-        nil,
-        sid,
-        name,
-        name_size,
-        domain,
-        domain_size,
-        use_ptr
-      )
+      # Second call, get desired information
+      unless LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
+        raise SystemCallError.new("LookupAccountSid", FFI.errno)
+      end
 
-      raise SystemCallError.new("LookupAccountSid", FFI.errno) unless bool
-
-      name = name.read_string(name_size.read_ulong * 2).tr(0.chr, '')
-      domain = domain.read_string(domain_size.read_ulong * 2).tr(0.chr, '')
+      name = name.read_string(name.size).tr(0.chr, '').strip
+      domain = dom.read_string(dom.size).tr(0.chr, '').strip
 
       domain << "\\" << name
     end
