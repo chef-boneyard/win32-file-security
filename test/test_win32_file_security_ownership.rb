@@ -84,6 +84,16 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     assert_equal(original_owner, File.owner(@@file))
   end
 
+  test "chown returns the number of files processed" do
+    omit_unless(@elevated)
+    assert_equal(1, File.chown(@@temp, nil, @@file))
+  end
+
+  test "chown requires at least two arguments" do
+    assert_raise(ArgumentError){ File.chown }
+    assert_raise(ArgumentError){ File.chown(@@temp) }
+  end
+
   def teardown
     @elevated = nil
   end
