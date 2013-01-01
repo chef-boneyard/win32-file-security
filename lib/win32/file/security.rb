@@ -1,6 +1,7 @@
-require File.join(File.dirname(__FILE__), 'windows', 'constants')
-require File.join(File.dirname(__FILE__), 'windows', 'structs')
-require File.join(File.dirname(__FILE__), 'windows', 'functions')
+require File.join(File.dirname(__FILE__), 'security', 'constants')
+require File.join(File.dirname(__FILE__), 'security', 'structs')
+require File.join(File.dirname(__FILE__), 'security', 'functions')
+require File.join(File.dirname(__FILE__), 'security', 'helper')
 require 'socket'
 
 class File
