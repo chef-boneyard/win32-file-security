@@ -13,11 +13,17 @@ class TC_Win32_File_Security_FFI < Test::Unit::TestCase
   end
 
   test "internal ffi functions are not public as singleton methods" do
+    assert_false(@singleton_methods.include?('AddAce'))
+    assert_false(@singleton_methods.include?('CloseHandle'))
     assert_false(@singleton_methods.include?('GetFileSecurityW'))
+    assert_false(@singleton_methods.include?('PathIsRootW'))
   end
 
   test "internal ffi functions are not public as instance methods" do
+    assert_false(@instance_methods.include?('AddAce'))
+    assert_false(@instance_methods.include?('CloseHandle'))
     assert_false(@instance_methods.include?('GetFileSecurityW'))
+    assert_false(@instance_methods.include?('PathIsRootW'))
   end
 
   def teardown
