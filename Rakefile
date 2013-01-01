@@ -39,6 +39,13 @@ namespace 'test' do
     t.test_files = FileList['test/test_win32_file_security_encryption']
   end
 
+  Rake::TestTask.new('ffi') do |t|
+    task :test => :clean
+    t.warning = true
+    t.verbose = true
+    t.test_files = FileList['test/test_win32_file_security_ffi']
+  end
+
   Rake::TestTask.new('ownership') do |t|
     task :test => :clean
     t.warning = true
