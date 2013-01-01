@@ -1,4 +1,4 @@
-= 1.0.1 - ???
+= 1.0.1 - 1-Jan-2013
 * Added a working implementation of File.owned?
 * Added a working implementation of File.chown.
 * Added the File.owner method.
