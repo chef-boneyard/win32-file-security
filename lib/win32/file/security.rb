@@ -25,7 +25,7 @@ class File
     # * encrypted
     # * readonly
     # * root directory (i.e. not encryptable)
-    # * system fiel (i.e. not encryptable)
+    # * system file (i.e. not encryptable)
     # * unsupported
     # * unknown
     #
