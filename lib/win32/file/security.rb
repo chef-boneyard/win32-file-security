@@ -211,14 +211,14 @@ class File
       dacl_present_ptr   = FFI::MemoryPointer.new(:bool)
       dacl_defaulted_ptr = FFI::MemoryPointer.new(:ulong)
 
-      val = GetSecurityDescriptorDacl(
+      bool = GetSecurityDescriptorDacl(
         security_ptr,
         dacl_present_ptr,
         dacl_pptr,
         dacl_defaulted_ptr
       )
 
-      if val == 0
+      unless bool
         raise SystemCallError.new("GetSecurityDescriptorDacl", FFI.errno)
       end
 
