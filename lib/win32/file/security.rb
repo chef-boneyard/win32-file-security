@@ -12,7 +12,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.1'
+  WIN32_FILE_SECURITY_VERSION = '1.0.2'
 
   class << self
     remove_method(:owned?)

@@ -1,3 +1,7 @@
+= 1.0.2 - 8-Apr-2013
+* Fixed HANDLE prototype in underlying FFI code. This affects 64 bit
+  versions of Ruby.
+
 = 1.0.1 - 1-Jan-2013
 * Added a working implementation of File.owned?
 * Added a working implementation of File.chown.
