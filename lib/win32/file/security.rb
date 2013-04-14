@@ -727,5 +727,68 @@ class File
 
       domain << "\\" << name
     end
+
+    # Returns the primary group of the specified file in domain\\userid format.
+    #
+    # Example:
+    #
+    #   p File.group('some_file.txt') # => "your_domain\\some_group"
+    #
+    def group(file)
+      size_needed = FFI::MemoryPointer.new(:ulong)
+
+      # First pass, get the size needed
+      bool = GetFileSecurityW(
+        file.wincode,
+        GROUP_SECURITY_INFORMATION,
+        nil,
+        0,
+        size_needed
+      )
+
+      security = FFI::MemoryPointer.new(size_needed.read_ulong)
+
+      # Second pass, this time with the appropriately sized security pointer
+      bool = GetFileSecurityW(
+        file.wincode,
+        GROUP_SECURITY_INFORMATION,
+        security,
+        security.size,
+        size_needed
+      )
+
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+
+      sid = FFI::MemoryPointer.new(:pointer)
+      defaulted = FFI::MemoryPointer.new(:bool)
+
+      unless GetSecurityDescriptorGroup(security, sid, defaulted)
+        raise SystemCallError.new("GetFileSecurity", FFI.errno)
+      end
+
+      sid = sid.read_pointer
+
+      name      = FFI::MemoryPointer.new(:uchar)
+      name_size = FFI::MemoryPointer.new(:ulong)
+      dom       = FFI::MemoryPointer.new(:uchar)
+      dom_size  = FFI::MemoryPointer.new(:ulong)
+      use       = FFI::MemoryPointer.new(:pointer)
+
+      # First call, get sizes needed
+      LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
+
+      name = FFI::MemoryPointer.new(:uchar, name_size.read_ulong * 2)
+      dom  = FFI::MemoryPointer.new(:uchar, dom_size.read_ulong * 2)
+
+      # Second call, get desired information
+      unless LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
+        raise SystemCallError.new("LookupAccountSid", FFI.errno)
+      end
+
+      name = name.read_string(name.size).tr(0.chr, '').strip
+      domain = dom.read_string(dom.size).tr(0.chr, '').strip
+
+      domain << "\\" << name
+    end
   end
 end

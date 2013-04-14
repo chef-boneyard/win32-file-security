@@ -3,6 +3,7 @@ module Windows
     module Constants
       SE_DACL_PRESENT            = 4
       OWNER_SECURITY_INFORMATION = 1
+      GROUP_SECURITY_INFORMATION = 2
       DACL_SECURITY_INFORMATION  = 4
       ACCESS_ALLOWED_ACE_TYPE    = 0
       ERROR_INSUFFICIENT_BUFFER  = 122

@@ -35,6 +35,7 @@ module Windows
       attach_pfunc :GetLengthSid, [:ptr], :dword
       attach_pfunc :GetSecurityDescriptorControl, [:ptr, :ptr, :ptr], :bool
       attach_pfunc :GetSecurityDescriptorOwner, [:ptr, :ptr, :ptr], :bool
+      attach_pfunc :GetSecurityDescriptorGroup, [:ptr, :ptr, :ptr], :bool
       attach_pfunc :GetSecurityDescriptorDacl, [:ptr, :ptr, :ptr, :ptr], :bool
       attach_pfunc :GetSecurityInfo, [:handle, :dword, :dword, :ptr, :ptr, :ptr, :ptr, :ptr], :dword
       attach_pfunc :GetTokenInformation, [:handle, :int, :ptr, :dword, :ptr], :bool
