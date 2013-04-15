@@ -15,8 +15,9 @@ class File
   WIN32_FILE_SECURITY_VERSION = '1.0.2'
 
   class << self
-    remove_method(:owned?)
     remove_method(:chown)
+    remove_method(:grpowned?)
+    remove_method(:owned?)
 
     # Returns the encryption status of a file as a string. Possible return
     # values are:
@@ -709,7 +710,7 @@ class File
       name_size = FFI::MemoryPointer.new(:ulong)
       dom       = FFI::MemoryPointer.new(:uchar)
       dom_size  = FFI::MemoryPointer.new(:ulong)
-      use       = FFI::MemoryPointer.new(:pointer)
+      use       = FFI::MemoryPointer.new(:int)
 
       # First call, get sizes needed
       LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
