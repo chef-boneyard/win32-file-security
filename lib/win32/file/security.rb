@@ -840,7 +840,7 @@ class File
       end
 
       sid = sid_ptr.read_pointer
-      ConvertSidToStringSidA(sid,pstring_sid)
+      ConvertSidToStringSidA(sid, pstring_sid)
       file_string_sid = pstring_sid.read_pointer.read_string
 
       token = FFI::MemoryPointer.new(:uintptr_t)
@@ -866,8 +866,10 @@ class File
         unless bool
           raise SystemCallError.new("GetTokenInformation", FFI.errno)
         end
-	ConvertSidToStringSidA(tgroup[:Groups][0][:Sid],pstring_sid)
-	string_sid = pstring_sid.read_pointer.read_string
+
+        ConvertSidToStringSidA(tgroup[:Groups][0][:Sid], pstring_sid)
+        string_sid = pstring_sid.read_pointer.read_string
+
         # Now compare the sid strings
         if string_sid == file_string_sid
           return_value = true
