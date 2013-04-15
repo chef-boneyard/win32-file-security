@@ -772,7 +772,7 @@ class File
       name_size = FFI::MemoryPointer.new(:ulong)
       dom       = FFI::MemoryPointer.new(:uchar)
       dom_size  = FFI::MemoryPointer.new(:ulong)
-      use       = FFI::MemoryPointer.new(:pointer)
+      use       = FFI::MemoryPointer.new(:int)
 
       # First call, get sizes needed
       LookupAccountSidW(nil, sid, name, name_size, dom, dom_size, use)
@@ -789,6 +789,91 @@ class File
       domain = dom.read_string(dom.size).tr(0.chr, '').strip
 
       domain << "\\" << name
+    end
+
+    # Returns true if the primary group ID of the process is the same
+    # as the owner of the named file.
+    #
+    # Example:
+    #
+    #   p File.grpowned?('some_file.txt') # => true
+    #   p File.grpowned?('C:/Windows/regedit.ext') # => false
+    #--
+    # This method was redefined for MS Windows.
+    #
+    def grpowned?(file)
+      return_value = false
+      wide_file = file.wincode
+      size_needed_ptr = FFI::MemoryPointer.new(:ulong)
+
+      # First pass, get the size needed
+      bool = GetFileSecurityW(
+        wide_file,
+        GROUP_SECURITY_INFORMATION,
+        nil,
+        0,
+        size_needed_ptr
+      )
+
+      size_needed = size_needed_ptr.read_ulong
+
+      security_ptr = FFI::MemoryPointer.new(size_needed)
+
+      # Second pass, this time with the appropriately sized security pointer
+      bool = GetFileSecurityW(
+        wide_file,
+        GROUP_SECURITY_INFORMATION,
+        security_ptr,
+        security_ptr.size,
+        size_needed_ptr
+      )
+
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+
+      sid_ptr = FFI::MemoryPointer.new(:pointer)
+      defaulted = FFI::MemoryPointer.new(:bool)
+
+      unless GetSecurityDescriptorGroup(security_ptr, sid_ptr, defaulted)
+        raise SystemCallError.new("GetFileSecurity", FFI.errno)
+      end
+
+      sid = sid_ptr.read_pointer
+
+      token = FFI::MemoryPointer.new(:ulong)
+
+      begin
+        # Get the current process sid
+        unless OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, token)
+          raise SystemCallError, FFI.errno, "OpenProcessToken"
+        end
+
+        token   = token.read_ulong
+        rlength = FFI::MemoryPointer.new(:ulong)
+        tgroup  = TOKEN_GROUP.new
+
+        bool = GetTokenInformation(
+          token,
+          TokenGroups,
+          tgroup,
+          tgroup.size,
+          rlength
+        )
+
+        unless bool
+          raise SystemCallError.new("GetTokenInformation", FFI.errno)
+        end
+
+        #string_sid = tgroup[8, (rlength.read_ulong - 8)]
+
+        # Now compare the sid strings
+        #if string_sid == sid.read_string(string_sid.size)
+        #  return_value = true
+        #end
+      ensure
+        CloseHandle(token)
+      end
+
+      return_value
     end
   end
 end

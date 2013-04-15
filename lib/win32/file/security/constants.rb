@@ -15,7 +15,9 @@ module Windows
       MAXDWORD                   = 0xFFFFFFFF
       TOKEN_QUERY                = 0x00000008
       TOKEN_ADJUST_PRIVILEGES    = 0x0020
+
       TokenUser                  = 1
+      TokenGroups                = 2
 
       SECURITY_DESCRIPTOR_REVISION   = 1
       SECURITY_DESCRIPTOR_MIN_LENGTH = 20

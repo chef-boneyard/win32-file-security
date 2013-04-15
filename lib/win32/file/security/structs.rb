@@ -52,6 +52,17 @@ module Windows
           :Privileges, [LUID_AND_ATTRIBUTES, 1]
         )
       end
+
+      class SID_AND_ATTRIBUTES < FFI::Struct
+        layout(:Sid, :pointer, :Attributes, :ulong)
+      end
+
+      class TOKEN_GROUP < FFI::Struct
+        layout(
+          :GroupCount, :ulong,
+          :Groups, [SID_AND_ATTRIBUTES, 128]
+        )
+      end
     end
   end
 end
