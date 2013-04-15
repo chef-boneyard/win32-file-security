@@ -69,6 +69,41 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     assert_raise(ArgumentError){ File.owner(@@file, @@file) }
   end
 
+  test "grpowned? method basic functionality" do
+    assert_respond_to(File, :grpowned?)
+    assert_nothing_raised{ File.grpowned?(@@file) }
+    assert_boolean(File.grpowned?(@@file))
+  end
+
+  test "grpowned? method returns expected result" do
+    if Win32::Security.elevated_security?
+      assert_false(File.grpowned?(@@file))
+    else
+      assert_true(File.grpowned?(@@file))
+    end
+    assert_false(File.grpowned?("C:\\Windows\\regedit.exe"))
+  end
+
+  test "grpowned? requires a single argument" do
+    assert_raise(ArgumentError){ File.grpowned? }
+    assert_raise(ArgumentError){ File.grpowned?(@@file, @@file) }
+  end
+
+  test "group method basic functionality" do
+    assert_respond_to(File, :group)
+    assert_nothing_raised{ File.group(@@file) }
+    assert_kind_of(String, File.group(@@file))
+  end
+
+  test "group method returns the expected value" do
+    if Win32::Security.elevated_security?
+      expected = "BUILTIN\\Administrators"
+    else
+      expected = @@host + "\\None"
+    end
+    assert_equal(expected, File.group(@@file))
+  end
+
   test "chown method basic functionality" do
     assert_respond_to(File, :chown)
   end
