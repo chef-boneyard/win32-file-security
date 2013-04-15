@@ -515,7 +515,7 @@ class File
 
       sid = sid_ptr.read_pointer
 
-      token = FFI::MemoryPointer.new(:ulong)
+      token = FFI::MemoryPointer.new(:uintptr_t)
 
       begin
         # Get the current process sid
@@ -523,8 +523,8 @@ class File
           raise SystemCallError, FFI.errno, "OpenProcessToken"
         end
 
-        token   = token.read_ulong
-        rlength = FFI::MemoryPointer.new(:ulong)
+        token   = token.read_pointer.to_i
+        rlength = FFI::MemoryPointer.new(:pointer)
         tuser   = 0.chr * 512
 
         bool = GetTokenInformation(
@@ -539,7 +539,7 @@ class File
           raise SystemCallError, FFI.errno, "GetTokenInformation"
         end
 
-        string_sid = tuser[8, (rlength.read_ulong - 8)]
+        string_sid = tuser[FFI.type_size(:pointer)*2, (rlength.read_ulong - FFI.type_size(:pointer)*2)]
 
         # Now compare the sid strings
         if string_sid == sid.read_string(string_sid.size)
@@ -798,7 +798,7 @@ class File
     # Example:
     #
     #   p File.grpowned?('some_file.txt') # => true
-    #   p File.grpowned?('C:/Windows/regedit.ext') # => false
+    #   p File.grpowned?('C:/Windows/regedit.exe') # => false
     #--
     # This method was redefined for MS Windows.
     #
@@ -833,14 +833,17 @@ class File
 
       sid_ptr = FFI::MemoryPointer.new(:pointer)
       defaulted = FFI::MemoryPointer.new(:bool)
+      pstring_sid = FFI::MemoryPointer.new(:string)
 
       unless GetSecurityDescriptorGroup(security_ptr, sid_ptr, defaulted)
         raise SystemCallError.new("GetFileSecurity", FFI.errno)
       end
 
       sid = sid_ptr.read_pointer
+      ConvertSidToStringSidA(sid,pstring_sid)
+      file_string_sid = pstring_sid.read_pointer.read_string
 
-      token = FFI::MemoryPointer.new(:ulong)
+      token = FFI::MemoryPointer.new(:uintptr_t)
 
       begin
         # Get the current process sid
@@ -848,7 +851,7 @@ class File
           raise SystemCallError, FFI.errno, "OpenProcessToken"
         end
 
-        token   = token.read_ulong
+        token   = token.read_pointer.to_i
         rlength = FFI::MemoryPointer.new(:ulong)
         tgroup  = TOKEN_GROUP.new
 
@@ -863,12 +866,10 @@ class File
         unless bool
           raise SystemCallError.new("GetTokenInformation", FFI.errno)
         end
-
-        # TODO: I don't know if this is right.
-        string_sid = tgroup[:Groups][0][:Sid].read_string
-
+	ConvertSidToStringSidA(tgroup[:Groups][0][:Sid],pstring_sid)
+	string_sid = pstring_sid.read_pointer.read_string
         # Now compare the sid strings
-        if string_sid == sid.read_string
+        if string_sid == file_string_sid
           return_value = true
         end
       ensure

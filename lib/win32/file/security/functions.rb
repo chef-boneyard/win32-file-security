@@ -48,6 +48,7 @@ module Windows
       attach_pfunc :SetFileSecurityW, [:buf_in, :dword, :ptr], :bool
       attach_pfunc :SetSecurityDescriptorDacl, [:ptr, :bool, :ptr, :bool], :bool
       attach_pfunc :SetSecurityDescriptorOwner, [:ptr, :ptr, :bool], :bool
+      attach_pfunc :ConvertSidToStringSidA, [:ptr,:ptr] ,:bool
 
       ffi_lib :kernel32
 
