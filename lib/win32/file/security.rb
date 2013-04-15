@@ -864,12 +864,13 @@ class File
           raise SystemCallError.new("GetTokenInformation", FFI.errno)
         end
 
-        #string_sid = tgroup[8, (rlength.read_ulong - 8)]
+        # TODO: I don't know if this is right.
+        string_sid = tgroup[:Groups][0][:Sid].read_string
 
         # Now compare the sid strings
-        #if string_sid == sid.read_string(string_sid.size)
-        #  return_value = true
-        #end
+        if string_sid == sid.read_string
+          return_value = true
+        end
       ensure
         CloseHandle(token)
       end
