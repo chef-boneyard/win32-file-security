@@ -13,16 +13,16 @@
   require 'win32/file/security
 
   p File.get_permissions('file.txt')
+
   p File.owner('file.txt')
   p File.owned?('file.txt')
 
-== Notes
-  If you have the win32-file gem already installed then you do not need this
-  gem. This library was split out from the win32-file gem in order to ease
-  testing and maintenance.
+  p File.group('file.txt')
+  p File.grpowned?('file.txt')
 
-  Otherwise, the only difference is that this library uses FFI instead
-  of win32-api. This also means that it works with JRuby.
+== Notes
+  Some of this library's methods already exist in the win32-file gem, so
+  you may not need this gem if you already have win32-file installed.
 
 == Known issues or bugs
   None that I'm aware of.
