@@ -9,6 +9,7 @@ require 'sys/admin'
 require 'test-unit'
 require 'win32/security'
 require 'win32/file/security'
+require 'pathname'
 
 class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
   def self.startup
@@ -69,6 +70,10 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     assert_raise(ArgumentError){ File.owner(@@file, @@file) }
   end
 
+  test "owner allows a pathname object" do
+    assert_nothing_raised{ File.owner(Pathname.new(@@file)) }
+  end
+
   test "grpowned? method basic functionality" do
     assert_respond_to(File, :grpowned?)
     assert_nothing_raised{ File.grpowned?(@@file) }
@@ -102,6 +107,15 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
       expected = @@host + "\\None"
     end
     assert_equal(expected, File.group(@@file))
+  end
+
+  test "group method allows a pathname object" do
+    assert_nothing_raised{ File.group(Pathname.new(@@file)) }
+  end
+
+  test "group method requires a stringy argument" do
+    assert_raise(TypeError){ File.group(nil) }
+    assert_raise(TypeError){ File.group([]) }
   end
 
   test "chown method basic functionality" do
