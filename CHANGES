@@ -1,3 +1,9 @@
+= 1.0.4 - 2-May-2014
+* All methods that accept a filename argument now honor objects that implement
+  either to_str or to_path.
+* Added some pathname tests.
+* Updated the gem:create Rakefile task.
+
 = 1.0.3 - 15-Apr-2013
 * Added the File.group method.
 * Added a working implementation of File.grpowned?
