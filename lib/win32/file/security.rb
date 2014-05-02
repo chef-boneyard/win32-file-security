@@ -1,7 +1,7 @@
-require File.join(File.dirname(__FILE__), 'security', 'constants')
-require File.join(File.dirname(__FILE__), 'security', 'structs')
-require File.join(File.dirname(__FILE__), 'security', 'functions')
-require File.join(File.dirname(__FILE__), 'security', 'helper')
+require_relative 'security/constants'
+require_relative 'security/structs'
+require_relative 'security/functions'
+require_relative 'security/helper'
 require 'socket'
 
 class File
@@ -12,7 +12,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.3'
+  WIN32_FILE_SECURITY_VERSION = '1.0.4'
 
   class << self
     remove_method(:chown)
@@ -31,7 +31,7 @@ class File
     # * unknown
     #
     def encryption_status(file)
-      wide_file  = file.wincode
+      wide_file  = string_check(file).wincode
       status_ptr = FFI::MemoryPointer.new(:ulong)
 
       unless FileEncryptionStatusW(wide_file, status_ptr)
@@ -77,7 +77,7 @@ class File
       flags_ptr = FFI::MemoryPointer.new(:ulong)
 
       if file
-        file = File.expand_path(file)
+        file = File.expand_path(string_check(file))
         wide_file = file.wincode
 
         if !PathIsRootW(wide_file)
@@ -114,7 +114,7 @@ class File
     # file is compressed the file will be decompressed before encrypting it.
     #
     def encrypt(file)
-      unless EncryptFileW(file.wincode)
+      unless EncryptFileW(string_check(file).wincode)
         raise SystemCallError.new("EncryptFile", FFI.errno)
       end
       self
@@ -131,7 +131,7 @@ class File
     # is NOT raised, it's simply a no-op.
     #
     def decrypt(file)
-      unless DecryptFileW(file.wincode, 0)
+      unless DecryptFileW(string_check(file).wincode, 0)
         raise SystemCallError.new("DecryptFile", FFI.errno)
       end
       self
@@ -159,11 +159,11 @@ class File
     #   }
     #
     def get_permissions(file, host=nil)
+      wide_file = string_check(file).wincode
+      wide_host = host ? host.wincode : nil
+
       size_needed_ptr = FFI::MemoryPointer.new(:ulong)
       security_ptr    = FFI::MemoryPointer.new(:ulong)
-
-      wide_file = file.wincode
-      wide_host = host ? host.wincode : nil
 
       # First pass, get the size needed
       bool = GetFileSecurityW(
@@ -321,10 +321,8 @@ class File
     #   File.set_permissions(file, "host\\userid" => File::GENERIC_ALL)
     #
     def set_permissions(file, perms)
-      raise TypeError unless file.is_a?(String)
+      wide_file = string_check(file).wincode
       raise TypeError unless perms.kind_of?(Hash)
-
-      wide_file = file.wincode
 
       account_rights = 0
       sec_desc = FFI::MemoryPointer.new(:pointer, SECURITY_DESCRIPTOR_MIN_LENGTH)
@@ -478,8 +476,9 @@ class File
     # This method was redefined for MS Windows.
     #
     def owned?(file)
+      wide_file = string_check(file).wincode
+
       return_value = false
-      wide_file = file.wincode
       size_needed_ptr = FFI::MemoryPointer.new(:ulong)
 
       # First pass, get the size needed
@@ -626,7 +625,7 @@ class File
         end
 
         files.each{ |file|
-          wfile = file.wincode
+          wfile = string_check(file).wincode
 
           size = FFI::MemoryPointer.new(:ulong)
           sec  = FFI::MemoryPointer.new(:ulong)
@@ -673,11 +672,12 @@ class File
     #   p File.owner('some_file.txt') # => "your_domain\\some_user"
     #
     def owner(file)
+      file = string_check(file).wincode
       size_needed = FFI::MemoryPointer.new(:ulong)
 
       # First pass, get the size needed
       bool = GetFileSecurityW(
-        file.wincode,
+        file,
         OWNER_SECURITY_INFORMATION,
         nil,
         0,
@@ -688,7 +688,7 @@ class File
 
       # Second pass, this time with the appropriately sized security pointer
       bool = GetFileSecurityW(
-        file.wincode,
+        file,
         OWNER_SECURITY_INFORMATION,
         security,
         security.size,
@@ -723,8 +723,8 @@ class File
         raise SystemCallError.new("LookupAccountSid", FFI.errno)
       end
 
-      name = name.read_string(name.size).tr(0.chr, '').strip
-      domain = dom.read_string(dom.size).tr(0.chr, '').strip
+      name = name.read_string(name.size).delete(0.chr)
+      domain = dom.read_string(dom.size).delete(0.chr)
 
       domain << "\\" << name
     end
@@ -736,11 +736,12 @@ class File
     #   p File.group('some_file.txt') # => "your_domain\\some_group"
     #
     def group(file)
+      file = string_check(file).wincode
       size_needed = FFI::MemoryPointer.new(:ulong)
 
       # First pass, get the size needed
       bool = GetFileSecurityW(
-        file.wincode,
+        file,
         GROUP_SECURITY_INFORMATION,
         nil,
         0,
@@ -751,7 +752,7 @@ class File
 
       # Second pass, this time with the appropriately sized security pointer
       bool = GetFileSecurityW(
-        file.wincode,
+        file,
         GROUP_SECURITY_INFORMATION,
         security,
         security.size,
@@ -786,8 +787,8 @@ class File
         raise SystemCallError.new("LookupAccountSid", FFI.errno)
       end
 
-      name = name.read_string(name.size).tr(0.chr, '').strip
-      domain = dom.read_string(dom.size).tr(0.chr, '').strip
+      name = name.read_string(name.size).delete(0.chr)
+      domain = dom.read_string(dom.size).delete(0.chr)
 
       domain << "\\" << name
     end
@@ -803,8 +804,9 @@ class File
     # This method was redefined for MS Windows.
     #
     def grpowned?(file)
+      wide_file = string_check(file).wincode
+
       return_value = false
-      wide_file = file.wincode
       size_needed_ptr = FFI::MemoryPointer.new(:ulong)
 
       # First pass, get the size needed
@@ -879,6 +881,16 @@ class File
       end
 
       return_value
+    end
+
+    private
+
+    # Simulate MRI's contortions for a stringiness check.
+    def string_check(arg)
+      return arg if arg.is_a?(String)
+      return arg.send(:to_str) if arg.respond_to?(:to_str, true) # MRI honors it, even if private
+      return arg.to_path if arg.respond_to?(:to_path)
+      raise TypeError
     end
   end
 end
