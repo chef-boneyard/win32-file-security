@@ -3,16 +3,14 @@ require 'ffi'
 module Windows
   module File
     module Functions
-
-      # Make FFI functions private
-      module FFI::Library
-        def attach_pfunc(*args)
-          attach_function(*args)
-          private args[0]
-        end
-      end
-
       extend FFI::Library
+
+      private
+
+      def self.attach_pfunc(*args)
+        attach_function(*args)
+        private args[0]
+      end
 
       # For convenience
       typedef :pointer, :ptr
