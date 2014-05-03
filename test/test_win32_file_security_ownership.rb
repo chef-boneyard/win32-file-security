@@ -15,7 +15,6 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
   def self.startup
     Dir.chdir(File.dirname(File.expand_path(File.basename(__FILE__))))
     @@file = File.join(Dir.pwd, 'ownership_test.txt')
-    File.open(@@file, 'w'){ |fh| fh.puts "This is an ownership test." }
 
     @@host  = Socket.gethostname
     @@temp  = "Temp"
@@ -28,6 +27,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
 
   def setup
     @elevated = Win32::Security.elevated_security?
+    File.open(@@file, 'w'){ |fh| fh.puts "This is an ownership test." }
   end
 
   test "owned? method basic functionality" do
@@ -145,11 +145,11 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
 
   def teardown
     @elevated = nil
+    File.delete(@@file) if File.exists?(@@file)
   end
 
   def self.shutdown
     Sys::Admin.delete_user(@@temp) if Win32::Security.elevated_security?
-    File.delete(@@file) if File.exists?(@@file)
     @@file = nil
     @@login = nil
     @@host = nil
