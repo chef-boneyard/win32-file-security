@@ -262,8 +262,8 @@ class File
           raise SystemCallError.new("LookupAccountSid", FFI.errno) unless bool
 
           # The x2 multiplier is necessary due to wide char strings.
-          name = name.read_string(name_size.read_ulong * 2).delete(0.chr)
-          domain = domain.read_string(domain_size.read_ulong * 2).delete(0.chr)
+          name = name.read_string(name_size.read_ulong * 2).wstrip
+          domain = domain.read_string(domain_size.read_ulong * 2).wstrip
 
           unless domain.empty?
             name = domain + '\\' + name
@@ -723,8 +723,8 @@ class File
         raise SystemCallError.new("LookupAccountSid", FFI.errno)
       end
 
-      name = name.read_string(name.size).delete(0.chr)
-      domain = dom.read_string(dom.size).delete(0.chr)
+      name = name.read_string(name.size).wstrip
+      domain = dom.read_string(dom.size).wstrip
 
       domain << "\\" << name
     end
@@ -787,8 +787,8 @@ class File
         raise SystemCallError.new("LookupAccountSid", FFI.errno)
       end
 
-      name = name.read_string(name.size).delete(0.chr)
-      domain = dom.read_string(dom.size).delete(0.chr)
+      name = name.read_string(name.size).wstrip
+      domain = dom.read_string(dom.size).wstrip
 
       domain << "\\" << name
     end
