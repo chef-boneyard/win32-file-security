@@ -1,3 +1,8 @@
+= 1.0.5 - 2-May-2015
+* Added the File.supports_acls? singleton method.
+* The File.get_permissions and File.set_permissions methods now explicitly
+  raise an error if the filesystem does not support ACL's.
+
 = 1.0.4 - 2-May-2014
 * All methods that accept a filename argument now honor objects that implement
   either to_str or to_path.
