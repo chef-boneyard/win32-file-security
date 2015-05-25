@@ -5,7 +5,6 @@
 # use the 'rake test' or 'rake test:perms' task to run this.
 ##############################################################################
 require 'test-unit'
-require 'test/unit'
 require 'win32/file/security'
 require 'socket'
 require 'etc'
