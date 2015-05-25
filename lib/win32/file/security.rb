@@ -193,7 +193,10 @@ class File
         size_needed_ptr
       )
 
-      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
+      # Only valid on NTFS
+      if !bool || [ERROR_NO_SECURITY_ON_OBJECT, ERROR_NOT_SUPPORTED].include?(FFI.errno)
+        raise SystemCallError.new("GetFileSecurity", FFI.errno)
+      end
 
       control_ptr  = FFI::MemoryPointer.new(:ulong)
       revision_ptr = FFI::MemoryPointer.new(:ulong)

@@ -16,6 +16,9 @@ module Windows
       TOKEN_QUERY                = 0x00000008
       TOKEN_ADJUST_PRIVILEGES    = 0x0020
 
+      ERROR_NOT_SUPPORTED = 50
+      ERROR_NO_SECURITY_ON_OBJECT = 1350
+
       TokenUser                  = 1
       TokenGroups                = 2
 
