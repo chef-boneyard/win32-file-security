@@ -8,7 +8,7 @@ require 'win32/file/security'
 require 'socket'
 require 'etc'
 
-class TC_Win32_File_Security_Permissions < Test::Unit::TestCase
+class TC_Win32_File_Security_ACLS < Test::Unit::TestCase
   def setup
     @dir = "C:/"
   end
