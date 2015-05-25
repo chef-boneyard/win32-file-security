@@ -12,7 +12,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.4'
+  WIN32_FILE_SECURITY_VERSION = '1.0.5'
 
   class << self
     remove_method(:chown)
@@ -61,15 +61,15 @@ class File
     end
 
     # Returns whether or not the root path of the specified file is
-    # encryptable. If a relative path is specified, it will check against
-    # the root of the current directory.
+    # encryptable. If no path or a relative path is specified, it will
+    # check against the root of the current directory.
     #
     # Be sure to include a trailing slash if specifying a root path.
     #
     # Examples:
     #
     #   p File.encryptable?
-    #   p File.encryptable?("D:\\")
+    #   p File.encryptable?("D:/")
     #   p File.encryptable?("C:/foo/bar.txt") # Same as 'C:\'
     #
     def encryptable?(file = nil)
@@ -96,6 +96,49 @@ class File
       flags = flags_ptr.read_ulong
 
       if flags & FILE_SUPPORTS_ENCRYPTION > 0
+        bool = true
+      end
+
+      bool
+    end
+
+
+    # Returns whether or not the root path of the specified file supports
+    # ACL's. If no path or a relative path is specified, it will check against
+    # the root of the current directory.
+    #
+    # Be sure to include a trailing slash if specifying a root path.
+    #
+    # Examples:
+    #
+    #   p File.supports_acls?
+    #   p File.supports_acls?("D:/")
+    #   p File.supports_acls?("C:/foo/bar.txt") # Same as 'C:\'
+    #
+    def supports_acls?(file = nil)
+      bool = false
+      flags_ptr = FFI::MemoryPointer.new(:ulong)
+
+      if file
+        file = File.expand_path(string_check(file))
+        wide_file = file.wincode
+
+        if !PathIsRootW(wide_file)
+          unless PathStripToRootW(wide_file)
+            raise SystemCallError.new("PathStripToRoot", FFI.errno)
+          end
+        end
+      else
+        wide_file = nil
+      end
+
+      unless GetVolumeInformationW(wide_file, nil, 0, nil, nil, flags_ptr, nil, 0)
+        raise SystemCallError.new("GetVolumeInformation", FFI.errno)
+      end
+
+      flags = flags_ptr.read_ulong
+
+      if flags & FILE_PERSISTENT_ACLS > 0
         bool = true
       end
 
@@ -193,10 +236,7 @@ class File
         size_needed_ptr
       )
 
-      # Only valid on NTFS
-      if !bool || [ERROR_NO_SECURITY_ON_OBJECT, ERROR_NOT_SUPPORTED].include?(FFI.errno)
-        raise SystemCallError.new("GetFileSecurity", FFI.errno)
-      end
+      raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       control_ptr  = FFI::MemoryPointer.new(:ulong)
       revision_ptr = FFI::MemoryPointer.new(:ulong)
