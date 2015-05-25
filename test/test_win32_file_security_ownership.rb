@@ -145,7 +145,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
 
   def teardown
     @elevated = nil
-    File.delete(@@file) if File.exists?(@@file)
+    File.delete(@@file) if File.exist?(@@file)
   end
 
   def self.shutdown
