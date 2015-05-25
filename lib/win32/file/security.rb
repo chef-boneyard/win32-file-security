@@ -202,6 +202,14 @@ class File
     #   }
     #
     def get_permissions(file, host=nil)
+      # Check local filesystem to see if it supports ACL's. If not, bail early
+      # because the GetFileSecurity function will not fail on an unsupported FS.
+      if host.nil?
+        unless supports_acls?(file)
+          raise ArgumentError, "Filesystem does not implement ACL support"
+        end
+      end
+
       wide_file = string_check(file).wincode
       wide_host = host ? host.wincode : nil
 
@@ -364,6 +372,12 @@ class File
     #   File.set_permissions(file, "host\\userid" => File::GENERIC_ALL)
     #
     def set_permissions(file, perms)
+      # Check local filesystem to see if it supports ACL's. If not, bail early
+      # because the GetFileSecurity function will not fail on an unsupported FS.
+      unless supports_acls?(file)
+        raise ArgumentError, "Filesystem does not implement ACL support"
+      end
+
       wide_file = string_check(file).wincode
       raise TypeError unless perms.kind_of?(Hash)
 
