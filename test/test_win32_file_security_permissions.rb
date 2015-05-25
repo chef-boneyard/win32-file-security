@@ -79,7 +79,7 @@ class TC_Win32_File_Security_Permissions < Test::Unit::TestCase
   end
 
   def self.shutdown
-    File.delete(@@file) if File.exists?(@@file)
+    File.delete(@@file) if File.exist?(@@file)
     @@file = nil
     @@host = nil
     @@user = nil
