@@ -2,6 +2,7 @@
 * Added the File.supports_acls? singleton method.
 * The File.get_permissions and File.set_permissions methods now explicitly
   raise an error if the filesystem does not support ACL's.
+* Fixed some deprecation warnings in the test suite.
 
 = 1.0.4 - 2-May-2014
 * All methods that accept a filename argument now honor objects that implement
