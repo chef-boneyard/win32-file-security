@@ -12,6 +12,21 @@ require 'win32/file/security'
 require 'pathname'
 
 class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
+  extend FFI::Library
+  ffi_lib :netapi32
+  attach_function :NetGetDCName, [:pointer, :pointer, :buffer_out], :int
+  attach_function :NetApiBufferFree, [:pointer], :int
+
+  # Helper method to determine if we're on a domain controller
+  def self.in_domain?
+    bool = true
+    buf = (0.chr * 256).encode('UTF-16LE')
+    rv = NetGetDCName(nil, nil, buf)
+    bool = false if rv != 0
+    NetApiBufferFree(buf)
+    bool
+  end
+
   def self.startup
     Dir.chdir(File.dirname(File.expand_path(File.basename(__FILE__))))
     @@file = File.join(Dir.pwd, 'ownership_test.txt')
@@ -19,6 +34,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     @@host  = Socket.gethostname
     @@temp  = "Temp"
     @@login = Etc.getlogin
+    @@domain = in_domain?
 
     if Win32::Security.elevated_security?
       Sys::Admin.add_user(:name => @@temp, :description => "Delete Me")
@@ -81,7 +97,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
   end
 
   test "grpowned? method returns expected result" do
-    if Win32::Security.elevated_security?
+    if Win32::Security.elevated_security? && @@domain
       assert_false(File.grpowned?(@@file))
     else
       assert_true(File.grpowned?(@@file))
@@ -101,7 +117,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
   end
 
   test "group method returns the expected value" do
-    if Win32::Security.elevated_security?
+    if Win32::Security.elevated_security? && @@domain
       expected = "BUILTIN\\Administrators"
     else
       expected = @@host + "\\None"
@@ -153,5 +169,6 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     @@file = nil
     @@login = nil
     @@host = nil
+    @@domain = nil
   end
 end
