@@ -12,7 +12,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.5'
+  WIN32_FILE_SECURITY_VERSION = '1.0.6'
 
   class << self
     remove_method(:chown)
@@ -314,10 +314,16 @@ class File
 
           # The x2 multiplier is necessary due to wide char strings.
           name = name.read_string(name_size.read_ulong * 2).wstrip
-          domain = domain.read_string(domain_size.read_ulong * 2).wstrip
 
-          unless domain.empty?
-            name = domain + '\\' + name
+          dsize = domain_size.read_ulong
+
+          # It's possible there is no domain.
+          if dsize > 0
+            domain = domain.read_string(dsize * 2).wstrip
+
+            unless domain.empty?
+              name = domain + '\\' + name
+            end
           end
 
           perms_hash[name] = access[:Mask]
