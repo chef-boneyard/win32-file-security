@@ -4,7 +4,7 @@ class String
     # functions that require it.
     def wincode
       unless encoding == Encoding::UTF_16LE
-        self.tr(File::SEPARATOR, File::ALT_SEPARATOR) + 0.chr).encode('UTF-16LE')
+        (self.tr(File::SEPARATOR, File::ALT_SEPARATOR) + 0.chr).encode('UTF-16LE')
       end
     end
   end
