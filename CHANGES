@@ -1,3 +1,10 @@
+= 1.0.6 - 28-May-2015
+* Handle the possibility of an empty/nil domain. Thanks go to n-nishizawa
+  for the spot.
+* Helper methods are only defined if not already defined.
+* Tests that were failing when run as admins in non-domain environments have
+  been modified to check for a domain first.
+
 = 1.0.5 - 2-May-2015
 * Added the File.supports_acls? singleton method.
 * The File.get_permissions and File.set_permissions methods now explicitly
