@@ -1,5 +1,5 @@
 class String
-  unless defined? :wincode
+  unless instance_methods.include?(:wincode)
     # Convenience method for converting strings to UTF-16LE for wide character
     # functions that require it.
     def wincode
@@ -9,7 +9,7 @@ class String
     end
   end
 
-  unless defined? :wstrip
+  unless instance_methods.include?(:wstrip)
     # Read a wide character string up until the first double null, and delete
     # any remaining null characters.
     def wstrip
