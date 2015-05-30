@@ -144,9 +144,9 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     expected_owner = (@@host + "\\" + @@temp).downcase
 
     assert_nothing_raised{ File.chown(@@temp, nil, @@file) }
-    assert_equal(expected_owner, File.owner(@@file))
+    assert_equal(expected_owner, File.owner(@@file).downcase)
     assert_nothing_raised{ File.chown(original_owner, nil, @@file) }
-    assert_equal(original_owner, File.owner(@@file))
+    assert_equal(original_owner, File.owner(@@file).downcase)
   end
 
   test "chown returns the number of files processed" do
