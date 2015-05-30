@@ -122,7 +122,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     else
       expected = @@host + "\\None"
     end
-    assert_equal(expected, File.group(@@file))
+    assert_equal(expected.downcase, File.group(@@file).downcase)
   end
 
   test "group method allows a pathname object" do
@@ -140,8 +140,8 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
 
   test "chown works as expected" do
     omit_unless(@elevated)
-    original_owner = File.owner(@@file)
-    expected_owner = @@host + "\\" + @@temp
+    original_owner = File.owner(@@file).downcase
+    expected_owner = (@@host + "\\" + @@temp).downcase
 
     assert_nothing_raised{ File.chown(@@temp, nil, @@file) }
     assert_equal(expected_owner, File.owner(@@file))
