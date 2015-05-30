@@ -1,3 +1,7 @@
+= 1.0.7 - ???
+* Updated some tests so that they ignore case on ownership and permissions
+  checks. Caught by Appveyor.
+
 = 1.0.6 - 28-May-2015
 * Handle the possibility of an empty/nil domain. Thanks go to n-nishizawa
   for the spot.
