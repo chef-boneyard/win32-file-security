@@ -53,7 +53,8 @@ class TC_Win32_File_Security_Permissions < Test::Unit::TestCase
   test "set_permissions works if host is specified" do
     @perms = {"#{@@host}\\#{@@user}" => File::GENERIC_ALL}
     assert_nothing_raised{ File.set_permissions(@@file, @perms) }
-    assert_equal(@perms, File.get_permissions(@@file))
+    assert_equal(@perms.keys.map(&:downcase), File.get_permissions(@@file).keys.map(&:downcase))
+    assert_equal(@perms.values, File.get_permissions(@@file).values)
   end
 
   test "securities method basic functionality" do
