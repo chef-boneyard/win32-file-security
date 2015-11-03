@@ -569,7 +569,7 @@ class File
       raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       sid_ptr = FFI::MemoryPointer.new(:pointer)
-      defaulted = FFI::MemoryPointer.new(:bool)
+      defaulted = FFI::MemoryPointer.new(:int)
 
       unless GetSecurityDescriptorOwner(security_ptr, sid_ptr, defaulted)
         raise SystemCallError.new("GetFileSecurity", FFI.errno)
@@ -761,7 +761,7 @@ class File
       raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       sid = FFI::MemoryPointer.new(:pointer)
-      defaulted = FFI::MemoryPointer.new(:bool)
+      defaulted = FFI::MemoryPointer.new(:int)
 
       unless GetSecurityDescriptorOwner(security, sid, defaulted)
         raise SystemCallError.new("GetFileSecurity", FFI.errno)
@@ -825,7 +825,7 @@ class File
       raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       sid = FFI::MemoryPointer.new(:pointer)
-      defaulted = FFI::MemoryPointer.new(:bool)
+      defaulted = FFI::MemoryPointer.new(:int)
 
       unless GetSecurityDescriptorGroup(security, sid, defaulted)
         raise SystemCallError.new("GetFileSecurity", FFI.errno)
@@ -897,7 +897,7 @@ class File
       raise SystemCallError.new("GetFileSecurity", FFI.errno) unless bool
 
       sid_ptr = FFI::MemoryPointer.new(:pointer)
-      defaulted = FFI::MemoryPointer.new(:bool)
+      defaulted = FFI::MemoryPointer.new(:int)
       pstring_sid = FFI::MemoryPointer.new(:string)
 
       unless GetSecurityDescriptorGroup(security_ptr, sid_ptr, defaulted)
