@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-file-security'
-  spec.version    = '1.0.6'
+  spec.version    = '1.0.7'
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
@@ -10,9 +10,9 @@ Gem::Specification.new do |spec|
   spec.summary    = 'File security methods for the File class on MS Windows'
   spec.test_files = Dir['test/test*']
   spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
+  spec.cert_chain = Dir['certs/djberg96_pub.pem']
 
-  spec.rubyforge_project = 'win32utils'
-  spec.extra_rdoc_files  = ['README', 'CHANGES', 'MANIFEST']
+  spec.extra_rdoc_files = ['README', 'CHANGES', 'MANIFEST']
 
   spec.add_dependency('ffi')
   spec.add_development_dependency('test-unit')
