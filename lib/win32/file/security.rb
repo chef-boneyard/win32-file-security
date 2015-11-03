@@ -12,7 +12,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.6'
+  WIN32_FILE_SECURITY_VERSION = '1.0.7'
 
   class << self
     remove_method(:chown)
@@ -479,7 +479,7 @@ class File
         }
       }
 
-      unless SetSecurityDescriptorDacl(sec_desc, true, acl_new, false)
+      unless SetSecurityDescriptorDacl(sec_desc, 1, acl_new, 0)
         raise SystemCallError.new("SetSecurityDescriptorDacl", FFI.errno)
       end
 
@@ -663,7 +663,7 @@ class File
           tp[:Privileges][0][:Luid] = luid
           tp[:Privileges][0][:Attributes] = SE_PRIVILEGE_ENABLED
 
-          unless AdjustTokenPrivileges(token_handle, false, tp, 0, nil, nil)
+          unless AdjustTokenPrivileges(token_handle, 0, tp, 0, nil, nil)
             raise SystemCallError.new("AdjustTokenPrivileges", FFI.errno)
           end
         }
@@ -713,7 +713,7 @@ class File
             raise SystemCallError.new("InitializeSecurityDescriptor", FFI.errno)
           end
 
-          unless SetSecurityDescriptorOwner(security, sid, false)
+          unless SetSecurityDescriptorOwner(security, sid, 0)
             raise SystemCallError.new("SetSecurityDescriptorOwner", FFI.errno)
           end
 

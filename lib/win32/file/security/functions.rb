@@ -23,7 +23,7 @@ module Windows
       ffi_lib :advapi32
 
       attach_pfunc :AddAce, [:ptr, :dword, :dword, :ptr, :dword], :bool
-      attach_pfunc :AdjustTokenPrivileges, [:handle, :bool, :ptr, :dword, :ptr, :ptr], :bool
+      attach_pfunc :AdjustTokenPrivileges, [:handle, :int, :ptr, :dword, :ptr, :ptr], :bool
       attach_pfunc :CopySid, [:dword, :ptr, :ptr], :bool
       attach_pfunc :EncryptFileW, [:buf_in], :bool
       attach_pfunc :DecryptFileW, [:buf_in, :dword], :bool
@@ -44,8 +44,8 @@ module Windows
       attach_pfunc :LookupPrivilegeValueA, [:str, :str, :ptr], :bool
       attach_pfunc :OpenProcessToken, [:handle, :dword, :ptr], :bool
       attach_pfunc :SetFileSecurityW, [:buf_in, :dword, :ptr], :bool
-      attach_pfunc :SetSecurityDescriptorDacl, [:ptr, :bool, :ptr, :bool], :bool
-      attach_pfunc :SetSecurityDescriptorOwner, [:ptr, :ptr, :bool], :bool
+      attach_pfunc :SetSecurityDescriptorDacl, [:ptr, :int, :ptr, :int], :bool
+      attach_pfunc :SetSecurityDescriptorOwner, [:ptr, :ptr, :int], :bool
       attach_pfunc :ConvertSidToStringSidA, [:ptr,:ptr] ,:bool
 
       ffi_lib :kernel32
