@@ -15,11 +15,17 @@ class TC_Win32_File_Security_ACLS < Test::Unit::TestCase
 
   test "supports_acls? basic functionality" do
     assert_respond_to(File, :supports_acls?)
-    assert_boolean(File.supports_acls?(@dir))
+    assert_boolean(File.supports_acls?)
   end
 
   test "supports_acls? returns the expected results" do
+    assert_true(File.supports_acls?)
     assert_true(File.supports_acls?(@dir))
+  end
+
+  test "supports_acls? takes an optional file name" do
+    assert_nothing_raised{ File.supports_acls?(@dir) }
+    assert_boolean(File.supports_acls?(@dir))
   end
 
   def teardown
