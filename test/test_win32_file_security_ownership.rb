@@ -23,7 +23,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     buf = (0.chr * 256).encode('UTF-16LE')
     rv = NetGetDCName(nil, nil, buf)
     bool = false if rv != 0
-    NetApiBufferFree(buf)
+    NetApiBufferFree(buf) if bool
     bool
   end
 
