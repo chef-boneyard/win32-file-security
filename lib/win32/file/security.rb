@@ -407,6 +407,9 @@ class File
 
         if ['BUILTIN', 'NT AUTHORITY'].include?(server.upcase)
           wide_server = nil
+        elsif account.nil?
+          wide_server = nil
+          account = server
         else
           wide_server = server.wincode
         end
