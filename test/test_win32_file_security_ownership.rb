@@ -37,7 +37,7 @@ class TC_Win32_File_Security_Ownership < Test::Unit::TestCase
     @@domain = in_domain?
 
     if Win32::Security.elevated_security?
-      Sys::Admin.add_user(:name => @@temp, :description => "Delete Me")
+      Sys::Admin.add_user(:name => @@temp, :description => "Delete Me", :password => 'a1b2c3D4ekd92!38d')
     end
   end
 
