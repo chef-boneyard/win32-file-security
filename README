@@ -21,7 +21,7 @@
   p File.grpowned?('file.txt')
 
 == Notes
-  Some of this library's methods already exist in the win32-file gem, so
+  Some of these methods already exist in the win32-file gem, so
   you may not need this gem if you already have win32-file installed.
 
 == Known issues or bugs
@@ -35,7 +35,7 @@
   Artistic 2.0
 
 == Copyright
-  (C) 2003-2015, Daniel J. Berger, All Rights Reserved
+  (C) 2003-2016, Daniel J. Berger, All Rights Reserved
 
 == Warranty
   This package is provided "as is" and without any express or
