@@ -387,7 +387,6 @@ class File
       wide_file = string_check(file).wincode
       raise TypeError unless perms.kind_of?(Hash)
 
-      account_rights = 0
       sec_desc = FFI::MemoryPointer.new(:pointer, SECURITY_DESCRIPTOR_MIN_LENGTH)
 
       unless InitializeSecurityDescriptor(sec_desc, 1)
@@ -402,6 +401,9 @@ class File
 
       perms.each{ |account, mask|
         next if mask.nil?
+
+        # reset account_rights for each entry in perms:
+        account_rights = 0
 
         server, account = account.split("\\")
 
