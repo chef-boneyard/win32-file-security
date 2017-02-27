@@ -6,8 +6,6 @@ skip_tags: true
 clone_depth: 10
 environment:
   matrix:
-  - ruby_version: 193
-    ruby_dir: 1.9.1
   - ruby_version: 200
     ruby_dir: 2.0.0
   - ruby_version: 200-x64
@@ -20,6 +18,10 @@ environment:
     ruby_dir: 2.2.0
   - ruby_version: 22-x64
     ruby_dir: 2.2.0
+  - ruby_version: 23
+    ruby_dir: 2.3.0
+  - ruby_version: 23-x64
+    ruby_dir: 2.3.0
 install:
 - ps: >-
     $env:path = "C:\Ruby" + $env:ruby_version + "\bin;" + $env:path
@@ -38,13 +40,14 @@ install:
 
     if ((gem query -i win32-security) -eq $False){ gem install win32-security --no-document }
 cache:
-- C:\Ruby193\lib\ruby\gems\1.9.1
 - C:\Ruby200\lib\ruby\gems\2.0.0
 - C:\Ruby200-x64\lib\ruby\gems\2.0.0
 - C:\Ruby21\lib\ruby\gems\2.1.0
 - C:\Ruby21-x64\lib\ruby\gems\2.1.0
 - C:\Ruby22\lib\ruby\gems\2.2.0
 - C:\Ruby22-x64\lib\ruby\gems\2.2.0
+- C:\Ruby23\lib\ruby\gems\2.3.0
+- C:\Ruby23-x64\lib\ruby\gems\2.3.0
 build: off
 test_script:
 - cmd: rake
