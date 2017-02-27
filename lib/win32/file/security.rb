@@ -1,7 +1,6 @@
 require_relative 'security/constants'
 require_relative 'security/structs'
 require_relative 'security/functions'
-require_relative 'security/helper'
 require 'socket'
 
 class File
@@ -12,7 +11,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.8'
+  WIN32_FILE_SECURITY_VERSION = '1.0.9'
 
   class << self
     remove_method(:chown)
