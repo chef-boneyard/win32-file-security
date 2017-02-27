@@ -1,3 +1,10 @@
+= 1.0.9 - 27-Feb-2017
+* Fixed a bug in the File.set_permissions method. Thanks go to Thomas Bernhart
+  for the spot and the patch.
+* Removed the helper.rb file, since the methods are already available from
+  the dependencies.
+* Removed Ruby 1.9.x from the test matrix, and added Ruby 2.3.x.
+
 = 1.0.8 - 30-Jan-2016
 * Fixed an issue for account names that do not contain a backslash. Thanks go
   to Ben Jansen for the spot and patch.
