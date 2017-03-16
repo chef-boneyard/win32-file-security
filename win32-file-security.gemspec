@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name       = 'win32-file-security'
-  spec.version    = '1.0.9'
+  spec.version    = '1.0.10'
   spec.authors    = ['Daniel J. Berger', 'Park Heesob']
   spec.license    = 'Artistic 2.0'
   spec.email      = 'djberg96@gmail.com'
@@ -15,6 +15,7 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = ['README', 'CHANGES', 'MANIFEST']
 
   spec.add_dependency('ffi')
+  spec.add_dependency('ffi-win32-extensions')
   spec.add_development_dependency('test-unit')
   spec.add_development_dependency('win32-security')
   spec.add_development_dependency('sys-admin')
