@@ -1,3 +1,10 @@
+= 1.0.10 - 16-Mar-2017
+* Added the ffi-win32-extensions gem as a dependency. This should have been
+  added when I removed the helper file. Thanks go to Thomas Bernhart for the
+  spot.
+* Explicitly freeze the WIN32_FILE_SECURITY_VERSION constant string and
+  add a test for it.
+
 = 1.0.9 - 27-Feb-2017
 * Fixed a bug in the File.set_permissions method. Thanks go to Thomas Bernhart
   for the spot and the patch.
