@@ -8,6 +8,7 @@ require 'win32/file/security'
 
 class TC_Win32_File_Security_Version < Test::Unit::TestCase
   test "version is set to expected value" do
-    assert_equal('1.0.9', File::WIN32_FILE_SECURITY_VERSION)
+    assert_equal('1.0.10', File::WIN32_FILE_SECURITY_VERSION)
+    assert_true(File::WIN32_FILE_SECURITY_VERSION.frozen?)
   end
 end
