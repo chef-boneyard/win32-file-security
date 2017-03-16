@@ -11,7 +11,7 @@ class File
   extend Windows::File::Functions
 
   # The version of the win32-file library
-  WIN32_FILE_SECURITY_VERSION = '1.0.9'
+  WIN32_FILE_SECURITY_VERSION = '1.0.10'.freeze
 
   class << self
     remove_method(:chown)
